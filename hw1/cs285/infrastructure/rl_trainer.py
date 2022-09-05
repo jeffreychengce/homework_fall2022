@@ -173,7 +173,8 @@ class RL_Trainer(object):
         # HINT2: you want each of these collected rollouts to be of length self.params['ep_len']
         print("\nCollecting data to be used for training...")
         #!!! TODO_JC
-        paths, envsteps_this_batch = sample_trajectories(self.env, collect_policy, batch_size*self.params['ep_len'], self.params['ep_len'])
+        paths, envsteps_this_batch = \
+            sample_trajectories(self.env, collect_policy, batch_size*self.params['ep_len'], self.params['ep_len'])
         #!!!
 
         # collect more rollouts with the same policy, to be saved as videos in tensorboard
@@ -182,8 +183,10 @@ class RL_Trainer(object):
         if self.log_video:
             print('\nCollecting train rollouts to be used for saving videos...')
             ## TODO look in utils and implement sample_n_trajectories
-            train_video_paths = utils.sample_n_trajectories(self.env, collect_policy, MAX_NVIDEO, MAX_VIDEO_LEN, True)
-
+            #!!!
+            train_video_paths = \
+                utils.sample_n_trajectories(self.env, collect_policy, MAX_NVIDEO, MAX_VIDEO_LEN, True)
+            #!!!
         return paths, envsteps_this_batch, train_video_paths
 
 
@@ -195,7 +198,10 @@ class RL_Trainer(object):
             # TODO sample some data from the data buffer
             # HINT1: use the agent's sample function
             # HINT2: how much data = self.params['train_batch_size']
-            ob_batch, ac_batch, re_batch, next_ob_batch, terminal_batch = TODO
+            #!!!
+            ob_batch, ac_batch, re_batch, next_ob_batch, terminal_batch = \
+                self.agent.sample(self.params['train_batch_size'])
+            #!!! 
 
             # TODO use the sampled data to train an agent
             # HINT: use the agent's train function
