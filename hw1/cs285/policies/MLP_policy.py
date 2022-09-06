@@ -84,7 +84,7 @@ class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
         #!!!
         observation = ptu.from_numpy(observation.astype(np.float32))
         action = self(observation)
-        return ptu.to_numpy(action)
+        return action.sample()
         #!!!
 
     # update/train this policy
@@ -100,10 +100,10 @@ class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
         #!!!
         if self.discrete:
             output_tensor = self.logits_na(observation)
-            return output_tensor
+            return distributions.Categorical(output_tensor)
         else:
             mean = self.mean_net(observation)
-            return distributions.Normal(mean, self.logstd())
+            return distributions.MultivariateNormal(mean, torch.diag(self.logstd.exp()))
         #!!!
 
 
@@ -124,6 +124,7 @@ class MLPPolicySL(MLPPolicy):
         loss = self.loss(actions, acs_labels_na)
         self.optimizer.zero_grad()
         loss.backwards()
+        self.optimizer.step()
         #!!!
         return {
             # You can add extra logging information here, but keep this line
