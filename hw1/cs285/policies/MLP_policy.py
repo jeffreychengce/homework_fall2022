@@ -84,7 +84,7 @@ class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
         #!!!
         observation = ptu.from_numpy(observation.astype(np.float32))
         action = self(observation)
-        return action.sample()
+        return ptu.to_numpy(action.sample())
         #!!!
 
     # update/train this policy
