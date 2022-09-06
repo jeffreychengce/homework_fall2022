@@ -97,7 +97,14 @@ class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
     # return more flexible objects, such as a
     # `torch.distributions.Distribution` object. It's up to you!
     def forward(self, observation: torch.FloatTensor) -> Any:
-        raise NotImplementedError
+        #!!!
+        if self.discrete:
+            output_tensor = self.logits_na(observation)
+            return output_tensor
+        else:
+            mean = self.mean_net(observation)
+            return distributions.Normal(mean, self.logstd())
+        #!!!
 
 
 #####################################################
@@ -115,6 +122,7 @@ class MLPPolicySL(MLPPolicy):
         # TODO: update the policy and return the loss
         #!!!
         loss = self.loss(actions, acs_labels_na)
+        self.optimizer.zero_grad()
         loss.backwards()
         #!!!
         return {

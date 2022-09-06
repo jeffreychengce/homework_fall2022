@@ -12,7 +12,7 @@ def sample_trajectory(env, policy, max_path_length, render=False):
 
     # initialize env for the beginning of a new rollout
     #!!!
-    ob, _ = env.reset() # HINT: should be the output of resetting the env
+    ob = env.reset() # HINT: should be the output of resetting the env
     #!!!
 
     # init vars
