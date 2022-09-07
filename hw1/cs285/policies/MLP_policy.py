@@ -84,7 +84,7 @@ class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
         #!!!
         observation = ptu.from_numpy(observation.astype(np.float32))
         action = self(observation)
-        return ptu.to_numpy(action.sample())
+        return ptu.to_numpy(action.rsample())
         #!!!
 
     # update/train this policy
@@ -121,12 +121,13 @@ class MLPPolicySL(MLPPolicy):
     ):
         # TODO: update the policy and return the loss
         #!!!
-        loss = self.loss(\
-            #ptu.from_numpy(self.get_action(observations)), ptu.from_numpy(actions)
-            self(ptu.from_numpy(observations)).rsample(), ptu.from_numpy(actions)
-            #torch.tensor(self.get_action(observations), requires_grad=True),\
-            #torch.tensor(actions,requires_grad=True)\
-        )
+        predicted = self(ptu.from_numpy(observations))
+        loss = -predicted.log_prob(ptu.from_numpy(actions)).mean()
+
+        """ loss = self.loss(\
+            self(ptu.from_numpy(observations)).rsample(), \
+            ptu.from_numpy(actions)
+        ) """
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()

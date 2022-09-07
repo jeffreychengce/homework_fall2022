@@ -166,8 +166,9 @@ class RL_Trainer(object):
         #!!!
         if itr == 0:
             import pickle
-            with open(load_initial_expertdata, 'rb') as paths_opened:
-                loaded_paths = pickle.load(paths_opened)
+            loaded_paths = pickle.load(open(load_initial_expertdata, "rb"))
+            """ with open(load_initial_expertdata, 'rb') as paths_opened:
+                loaded_paths = pickle.load(paths_opened) """
             return(loaded_paths, 0, None)
         #!!!
         # TODO collect `batch_size` samples to be used for training
