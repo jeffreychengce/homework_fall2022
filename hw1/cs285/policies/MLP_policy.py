@@ -122,8 +122,9 @@ class MLPPolicySL(MLPPolicy):
         # TODO: update the policy and return the loss
         #!!!
         loss = self.loss(\
-            torch.tensor(self.get_action(observations), requires_grad=True),\
-            torch.tensor(actions,requires_grad=True)\
+            self(ptu.from_numpy(observations)).rsample(), ptu.from_numpy(actions)
+            #torch.tensor(self.get_action(observations), requires_grad=True),\
+            #torch.tensor(actions,requires_grad=True)\
         )
         self.optimizer.zero_grad()
         loss.backward()
