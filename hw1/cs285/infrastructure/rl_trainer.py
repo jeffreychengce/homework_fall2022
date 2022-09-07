@@ -164,10 +164,12 @@ class RL_Trainer(object):
 
                 # (2) collect `self.params['batch_size']` transitions
         #!!!
-        if iter == 0:
-            return(load_initial_expertdata, 0, None)
+        if itr == 0:
+            import pickle
+            with open(load_initial_expertdata, 'rb') as paths_opened:
+                loaded_paths = pickle.load(paths_opened)
+            return(loaded_paths, 0, None)
         #!!!
-
         # TODO collect `batch_size` samples to be used for training
         # HINT1: use sample_trajectories from utils
         # HINT2: you want each of these collected rollouts to be of length self.params['ep_len']
@@ -221,8 +223,8 @@ class RL_Trainer(object):
         # HINT: query the policy (using the get_action function) with paths[i]["observation"]
         # and replace paths[i]["action"] with these expert labels
         #!!!
-        for i in range(paths):
-            paths[i]["action"] = expert_policy.get_action(paths[i]["observations"])
+        for i in range(len(paths)):
+            paths[i]["action"] = expert_policy.get_action(paths[i]["observation"])
         #!!!
         return paths
 
