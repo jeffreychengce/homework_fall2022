@@ -121,7 +121,8 @@ class MLPPolicySL(MLPPolicy):
     ):
         # TODO: update the policy and return the loss
         #!!!
-        loss = self.loss(actions, acs_labels_na)
+        print(self.get_action(observations).shape,actions.shape)
+        loss = self.loss(self.get_action(observations), actions)
         self.optimizer.zero_grad()
         loss.backwards()
         self.optimizer.step()
