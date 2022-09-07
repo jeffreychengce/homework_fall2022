@@ -49,6 +49,7 @@ def build_mlp(
     # Note: nn.Sequential is an instance of nn.Module.
     #!!!
     layers = [nn.Linear(input_size,size)]
+    layers.append(activation)
     for i in range(n_layers):
         layers.append(nn.Linear(size,size))
         layers.append(activation)
