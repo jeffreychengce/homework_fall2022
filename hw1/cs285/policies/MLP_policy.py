@@ -122,6 +122,7 @@ class MLPPolicySL(MLPPolicy):
         # TODO: update the policy and return the loss
         #!!!
         predicted = self(ptu.from_numpy(observations))
+        #use log probability of actions
         loss = -predicted.log_prob(ptu.from_numpy(actions)).mean()
 
         """ loss = self.loss(\
