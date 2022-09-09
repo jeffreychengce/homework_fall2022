@@ -29,7 +29,7 @@ python cs285/scripts/run_hw1.py \
     --video_log_freq -1 --ep_len 1000 --eval_batch_size 5000 \
     --n_layers 2
 ```
-Then ```n_layers``` is varied from 2 to 10 in increments of 1.
+Then ```n_layers``` is varied from 2 to 64 by powers of 2.
 
 
 

@@ -73,28 +73,26 @@ plt.legend(loc='lower right')
 fig.set_size_inches(10, 6)
 #%%
 ant_bc_train_avg = ant_dagger_train_avg
-ant_bc_eval_avg = [4085.021240234375,4076.183349609375,4130.578125,\
-                       3337.940185546875,4199.01025390625,3472.736328125,\
-                       2410.2841796875,3800.73974609375,3292.074462890625]
-ant_bc_eval_std = [479.2840270996094,230.29444885253906,17.60784149169922,\
-                       906.5476684570312,148.285888671875,1452.61279296875,\
-                       1607.117431640625,223.2168426513672,1127.9041748046875]
+ant_bc_eval_avg = [4085.021240234375,4130.578125,2410.2841796875,\
+                   620.5418701171875,635.9246826171875,648.3138427734375]
+ant_bc_eval_std = [479.2840270996094,17.60784149169922,1607.117431640625,\
+                   69.79251098632812,159.2235870361328,71.48976135253906]
 
 ant_bc_eval_avg_norm = np.array(ant_bc_eval_avg)/ant_bc_train_avg
 ant_bc_eval_std_norm = np.array(ant_bc_eval_std)/ant_bc_train_avg
 
 fig = plt.figure()
-x = np.arange(2,11)
+x = np.array([2,4,8,16,32,64])
 
 plt.errorbar(x, ant_bc_eval_avg, yerr=ant_bc_eval_std, label='Behavioral Cloning Agent')
 
-plt.hlines(ant_dagger_train_avg,0,10,'r',label='Expert')
+plt.hlines(ant_dagger_train_avg,0,64,'r',label='Expert')
 plt.xlabel('Number of Hidden Layers')
 plt.ylabel('Average Return')
 plt.title('Ant Behavioral Cloning with Varying Network Depth')
 
 
-plt.legend(loc='lower right')
+plt.legend(loc='upper right')
 
 fig.set_size_inches(10, 6)
 
