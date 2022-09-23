@@ -96,7 +96,7 @@ class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
         # return the action that the policy prescribes
         observation = ptu.from_numpy(observation.astype(np.float32))
         action = self(observation)
-        return ptu.to_numpy(action.rsample())
+        return ptu.to_numpy(action.sample())
         #!!!
 
     # update/train this policy
@@ -144,8 +144,14 @@ class MLPPolicyPG(MLPPolicy):
             # sum_{t=0}^{T-1} [grad [log pi(a_t|s_t) * (Q_t - b_t)]]
         # HINT2: you will want to use the `log_prob` method on the distribution returned
             # by the `forward` method
-
-        TODO
+        #!!!
+        logits = self(ptu.from_numpy(observations))
+        negative_likelihoods = F.cross_entropy(ptu.from_numpy(actions), logits)
+        loss = torch.mean(negative_likelihoods)
+        self.optimizer.zero_grad()
+        loss.backward()
+        self.optimizer.step()
+        #!!!
 
         if self.nn_baseline:
             ## TODO: update the neural network baseline using the q_values as
@@ -154,8 +160,9 @@ class MLPPolicyPG(MLPPolicy):
 
             ## Note: You will need to convert the targets into a tensor using
                 ## ptu.from_numpy before using it in the loss
-
-            TODO
+            #!!!
+            q_values_normalized = (q_values-np.mean(q_values))/np.std(q_values)
+            #!!!
 
         train_log = {
             'Training Loss': ptu.to_numpy(loss),

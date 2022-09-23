@@ -45,7 +45,7 @@ class PGAgent(BaseAgent):
         #!!!
         print(rewards_list)
         q_vals = self.calculate_q_vals(rewards_list)
-        advantages = self.estimate_advantage(observations, actions, rewards_list, q_vals, terminals)
+        advantages = self.estimate_advantage(observations, rewards_list, q_vals, terminals)
         train_log = self.actor.update(observations, actions, advantages, q_values=q_vals)
         #!!!
 
@@ -85,7 +85,7 @@ class PGAgent(BaseAgent):
         else:
             q_values = np.array([self._discounted_cumsum(i) for i in rewards_list])
 
-        q_values = np.flatten(q_values)
+        q_values = q_values.flatten()
         #!!!
         return q_values
 
@@ -128,7 +128,10 @@ class PGAgent(BaseAgent):
                         ## is 1 if the state is the last in its trajectory, and
                         ## 0 otherwise.
                     #!!!
-                    advantages[i] = estimate_advantages(obs[:i], rews_list[:i], q_values[:i], terminals[:i])
+                    if terminals[i]:
+                        continue
+                    else:
+                        advantages[i] = self.estimate_advantages(obs[:i], rews_list[:i], q_values[:i], terminals[:i])
                     #!!!
                 # remove dummy advantage
                 advantages = advantages[:-1]
@@ -149,7 +152,8 @@ class PGAgent(BaseAgent):
             #!!!
             advantages = (advantages-np.mean(advantages))/np.std(advantages)
             #!!!
-
+        print(advantages)
+        print(np.shape(advantages))
         return advantages
 
     #####################################################
@@ -180,7 +184,7 @@ class PGAgent(BaseAgent):
         for t in range(T):
             r_prime += (self.gamma**t) * rewards[t]
         for t in range(T):
-            list_of_discounted_returns.append[r_prime]
+            list_of_discounted_returns.append(r_prime)
         #!!!
         return list_of_discounted_returns
 
@@ -198,6 +202,6 @@ class PGAgent(BaseAgent):
             for i in range(T-t):
                 t_prime = t+i
                 r_prime_i += (self.gamma**(t_prime-t))*rewards[t_prime]                
-            list_of_discounted_cumsums.append[r_prime_i]
+            list_of_discounted_cumsums.append(r_prime_i)
         #!!!
         return list_of_discounted_cumsums
