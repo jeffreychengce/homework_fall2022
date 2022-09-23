@@ -78,12 +78,14 @@ class PGAgent(BaseAgent):
         q_values = []
 
         if not self.reward_to_go:
-            q_values = [self._discounted_return(i) for i in rewards_list]
+            q_values = np.array([self._discounted_return(i) for i in rewards_list])
 
         # Case 2: reward-to-go PG
         # Estimate Q^{pi}(s_t, a_t) by the discounted sum of rewards starting from t
         else:
-            q_values = [self._discounted_cumsum(i) for i in rewards_list]
+            q_values = np.array([self._discounted_cumsum(i) for i in rewards_list])
+
+        q_values = np.flatten(q_values)
         #!!!
         return q_values
 
@@ -103,7 +105,9 @@ class PGAgent(BaseAgent):
             ## TODO: values were trained with standardized q_values, so ensure
                 ## that the predictions have the same mean and standard deviation as
                 ## the current batch of q_values
-            values = TODO
+            #!!!
+            values = (values-np.mean(values)+np.mean(q_values))*np.std(q_values)/np.std(values)
+            #!!!
 
             if self.gae_lambda is not None:
                 ## append a dummy T+1 value for simpler recursive calculation
@@ -123,13 +127,17 @@ class PGAgent(BaseAgent):
                     ## HINT: use terminals to handle edge cases. terminals[i]
                         ## is 1 if the state is the last in its trajectory, and
                         ## 0 otherwise.
-
+                    #!!!
+                    advantages[i] = estimate_advantages(obs[:i], rews_list[:i], q_values[:i], terminals[:i])
+                    #!!!
                 # remove dummy advantage
                 advantages = advantages[:-1]
 
             else:
                 ## TODO: compute advantage estimates using q_values, and values as baselines
-                advantages = TODO
+                #!!!
+                advantages = q_values-values
+                #!!!
 
         # Else, just set the advantage to [Q]
         else:
