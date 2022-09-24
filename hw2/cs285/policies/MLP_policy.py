@@ -145,9 +145,11 @@ class MLPPolicyPG(MLPPolicy):
         # HINT2: you will want to use the `log_prob` method on the distribution returned
             # by the `forward` method
         #!!!
-        logits = self(ptu.from_numpy(observations))
-        negative_likelihoods = F.cross_entropy(ptu.from_numpy(actions), logits)
-        loss = torch.mean(negative_likelihoods)
+        q_values = ptu.from_numpy(q_values)
+        logits = self(observations)
+        negative_likelihoods = logits.log_prob(actions)
+        weighted_negative_likelihoods = -torch.mul(negative_likelihoods, q_values)
+        loss = torch.mean(weighted_negative_likelihoods)
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
