@@ -59,7 +59,7 @@ def build_mlp(
 
 
 device = None
-
+print(torch.version.cuda)
 
 def init_gpu(use_gpu=True, gpu_id=0):
     global device
