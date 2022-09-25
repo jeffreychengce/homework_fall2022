@@ -137,23 +137,13 @@ class MLPPolicyPG(MLPPolicy):
         observations = ptu.from_numpy(observations)
         actions = ptu.from_numpy(actions)
         advantages = ptu.from_numpy(advantages)
-
+        q_values = ptu.from_numpy(q_values)
         # TODO: update the policy using policy gradient
         # HINT1: Recall that the expression that we want to MAXIMIZE
             # is the expectation over collected trajectories of:
             # sum_{t=0}^{T-1} [grad [log pi(a_t|s_t) * (Q_t - b_t)]]
         # HINT2: you will want to use the `log_prob` method on the distribution returned
             # by the `forward` method
-        #!!!
-        q_values = ptu.from_numpy(q_values)
-        logits = self(observations)
-        negative_likelihoods = logits.log_prob(actions)
-        weighted_negative_likelihoods = -torch.mul(negative_likelihoods, q_values)
-        loss = torch.mean(weighted_negative_likelihoods)
-        self.optimizer.zero_grad()
-        loss.backward()
-        self.optimizer.step()
-        #!!!
 
         if self.nn_baseline:
             ## TODO: update the neural network baseline using the q_values as
@@ -163,8 +153,22 @@ class MLPPolicyPG(MLPPolicy):
             ## Note: You will need to convert the targets into a tensor using
                 ## ptu.from_numpy before using it in the loss
             #!!!
-            q_values_normalized = (q_values-np.mean(q_values))/np.std(q_values)
+            q_values_normalized = (q_values-torch.mean(q_values))/torch.std(q_values)
             #!!!
+        else:
+            q_values_normalized = q_values
+
+        #!!!
+        
+        logits = self(observations)
+        negative_likelihoods = logits.log_prob(actions)
+        weighted_negative_likelihoods = -torch.mul(negative_likelihoods, q_values_normalized)
+        loss = torch.mean(weighted_negative_likelihoods)
+        self.optimizer.zero_grad()
+        loss.backward()
+        self.optimizer.step()
+        #!!!
+
 
         train_log = {
             'Training Loss': ptu.to_numpy(loss),

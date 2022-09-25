@@ -240,8 +240,6 @@ class RL_Trainer(object):
 
             # decide what to log
             logs = OrderedDict()
-            self.return_history.append(np.mean(eval_returns))
-            logs['Eval_History_MaxReturn'] = max(self.return_history)
             logs["Eval_AverageReturn"] = np.mean(eval_returns)
             logs["Eval_StdReturn"] = np.std(eval_returns)
             logs["Eval_MaxReturn"] = np.max(eval_returns)
@@ -261,6 +259,8 @@ class RL_Trainer(object):
             if itr == 0:
                 self.initial_return = np.mean(train_returns)
             logs["Initial_DataCollection_AverageReturn"] = self.initial_return
+            self.return_history.append(np.mean(eval_returns))
+            logs['Eval_History_MaxReturn'] = max(self.return_history)
 
             # perform the logging
             for key, value in logs.items():

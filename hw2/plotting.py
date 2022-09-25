@@ -26,11 +26,9 @@ def get_section_results(file):
     return X, Y
 
 #%%
-if __name__ == '__main__':
-    import glob
 
-    eventfile = glob.glob('**/q2_pg_q1_sb_no_rtg_dsa_CartPole-v0_23-09-2022_15-42-51/*')[0]
-
-    X, Y = get_section_results(eventfile)
-    for i, (x, y) in enumerate(zip(X, Y)):
-        print('Iteration {:d} | Train steps: {:d} | Return: {}'.format(i, int(x), y))
+# q1
+q1_sb_no_rtg_dsa_CartPole = glob.glob('**/q2_pg_q1_sb_no_rtg_dsa_CartPole-v0_24-09-2022_00-35-05/*')[0]
+q1_sb_rtg_dsa_CartPole = glob.glob('**/q2_pg_q1_sb_rtg_dsa_CartPole-v0_24-09-2022_00-32-54/*')[0]
+_, q1_sb_no_rtg_dsa_CartPole_returns = get_section_results( q1_sb_no_rtg_dsa_CartPole)
+_, q1_sb_rtg_dsa_CartPole_returns = get_section_results(q1_sb_rtg_dsa_CartPole)
