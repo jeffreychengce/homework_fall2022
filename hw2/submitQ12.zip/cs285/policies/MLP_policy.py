@@ -9,7 +9,6 @@ import torch
 from torch import distributions
 
 from cs285.infrastructure import pytorch_util as ptu
-from cs285.infrastructure.utils import normalize
 from cs285.policies.base_policy import BasePolicy
 
 
@@ -138,21 +137,23 @@ class MLPPolicyPG(MLPPolicy):
         observations = ptu.from_numpy(observations)
         actions = ptu.from_numpy(actions)
         advantages = ptu.from_numpy(advantages)
-        
+
         # TODO: update the policy using policy gradient
         # HINT1: Recall that the expression that we want to MAXIMIZE
             # is the expectation over collected trajectories of:
             # sum_{t=0}^{T-1} [grad [log pi(a_t|s_t) * (Q_t - b_t)]]
         # HINT2: you will want to use the `log_prob` method on the distribution returned
             # by the `forward` method
-
+        #!!!
+        q_values = ptu.from_numpy(q_values)
         logits = self(observations)
         negative_likelihoods = logits.log_prob(actions)
-        weighted_negative_likelihoods = -torch.mul(negative_likelihoods, advantages)
+        weighted_negative_likelihoods = -torch.mul(negative_likelihoods, q_values)
         loss = torch.mean(weighted_negative_likelihoods)
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
+        #!!!
 
         if self.nn_baseline:
             ## TODO: update the neural network baseline using the q_values as
@@ -162,17 +163,8 @@ class MLPPolicyPG(MLPPolicy):
             ## Note: You will need to convert the targets into a tensor using
                 ## ptu.from_numpy before using it in the loss
             #!!!
-            q_values = ptu.from_numpy(q_values)
-            q_values_normalized = normalize(q_values,torch.mean(q_values),torch.std(q_values))
-
-            ### Default baseline loss is MSE
-            base_loss = self.baseline_loss(self.baseline.forward(observations).squeeze(),q_values_normalized)
-
-            self.baseline_optimizer.zero_grad()
-            base_loss.backward()
-            self.baseline_optimizer.step()
+            q_values_normalized = (q_values-np.mean(q_values))/np.std(q_values)
             #!!!
-
 
         train_log = {
             'Training Loss': ptu.to_numpy(loss),

@@ -1,4 +1,3 @@
-from cs285.infrastructure.utils import normalize
 import numpy as np
 
 from .base_agent import BaseAgent
@@ -83,8 +82,11 @@ class PGAgent(BaseAgent):
         # Estimate Q^{pi}(s_t, a_t) by the discounted sum of rewards starting from t
         else:
             q_values = np.array([self._discounted_cumsum(i) for i in rewards_list])
-
-        q_values = np.concatenate(q_values,axis=0)
+        # if np.shape(q_values)==(5,200):
+        #     print(q_values)
+        #     print(rewards_list)
+        print(np.shape(q_values))
+        q_values = np.concatenate(q_values.flatten(),axis=0)
         #!!!
         return q_values
 
@@ -105,7 +107,7 @@ class PGAgent(BaseAgent):
                 ## that the predictions have the same mean and standard deviation as
                 ## the current batch of q_values
             #!!!
-            values = (values_unnormalized-np.mean(values_unnormalized)+np.mean(q_values))*np.std(q_values)/np.std(values_unnormalized)
+            values = (values-np.mean(values)+np.mean(q_values))*np.std(q_values)/np.std(values)
             #!!!
 
             if self.gae_lambda is not None:
@@ -128,9 +130,9 @@ class PGAgent(BaseAgent):
                         ## 0 otherwise.
                     #!!!
                     if terminals[i]:
-                        advantages[i] = q_values[i]-values[i]
+                        continue
                     else:
-                        advantages[i] = rews[i]+self.gamma*values[i+1]-values[i]+self.gamma*self.gae_lambda*advantages[i+1]
+                        advantages[i] = 0
                     #!!!
                 # remove dummy advantage
                 advantages = advantages[:-1]
@@ -149,8 +151,7 @@ class PGAgent(BaseAgent):
         # and a standard deviation of one
         if self.standardize_advantages:
             #!!!
-            #advantages = (advantages-np.mean(advantages))/np.std(advantages)
-            advantages = normalize(advantages, np.mean(advantages), np.std(advantages))
+            advantages = (advantages-np.mean(advantages))/np.std(advantages)
             #!!!
         return advantages
 
