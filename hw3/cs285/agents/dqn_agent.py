@@ -41,22 +41,24 @@ class DQNAgent(object):
             At the end of this block of code, the simulator should have been
             advanced one step, and the replay buffer should contain one more transition.
             Note that self.last_obs must always point to the new latest observation.
-        """        
-
-        # TODO store the latest observation ("frame") into the replay buffer
+        """ 
+        # TODO store the latest observation ("frame") into the replay buffer       
+        #!!!
         # HINT: the replay buffer used here is `MemoryOptimizedReplayBuffer`
             # in dqn_utils.py
-        self.replay_buffer_idx = TODO
+        self.replay_buffer_idx = self.replay_buffer.encode_recent_observation()
+        #!!!
 
         eps = self.exploration.value(self.t)
 
         # TODO use epsilon greedy exploration when selecting action
-        perform_random_action = TODO
+        #!!!
+        perform_random_action = (np.random.random() < eps) or (self.t < self.learning_starts)
         if perform_random_action:
             # HINT: take random action (can sample from self.env.action_space)
                 # with probability eps (see np.random.random())
                 # OR if your current step number (see self.t) is less that self.learning_starts
-            action = TODO
+            action = np.random.random()
         else:
             # HINT: Your actor will take in multiple previous observations ("frames") in order
                 # to deal with the partial observability of the environment. Get the most recent 
@@ -77,6 +79,7 @@ class DQNAgent(object):
 
         # TODO if taking this step resulted in done, reset the env (and the latest observation)
         TODO
+        #!!!
 
     def sample(self, batch_size):
         if self.replay_buffer.can_sample(self.batch_size):
