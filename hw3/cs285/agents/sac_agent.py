@@ -51,6 +51,11 @@ class SACAgent(BaseAgent):
         # HINT: You need to use the entropy term (alpha)
         # 2. Get current Q estimates and calculate critic loss
         # 3. Optimize the critic  
+
+        #!!!
+        q_target = self.critic_target(ob_no, ac_na)
+        #!!!
+
         return critic_loss
 
     def train(self, ob_no, ac_na, re_n, next_ob_no, terminal_n):
@@ -68,10 +73,12 @@ class SACAgent(BaseAgent):
 
         # 4. gather losses for logging
         loss = OrderedDict()
+        #!!!
         loss['Critic_Loss'] = TODO
         loss['Actor_Loss'] = TODO
         loss['Alpha_Loss'] = TODO
         loss['Temperature'] = TODO
+        #!!!
 
         return loss
 

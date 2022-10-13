@@ -38,6 +38,7 @@ class RL_Trainer(object):
         # Get params, create logger
         self.params = params
         self.logger = Logger(self.params['logdir'])
+        self.return_history = []
 
         # Set random seeds
         seed = self.params['seed']
@@ -320,7 +321,7 @@ class RL_Trainer(object):
 
     def train_agent(self):
         #!!!
-        print('\nTraining agent using sampled data from replay buffer...')
+        # print('\nTraining agent using sampled data from replay buffer...')
         all_logs = []
         for train_step in range(self.params['num_agent_train_steps_per_iter']):
             
@@ -433,6 +434,8 @@ class RL_Trainer(object):
             if itr == 0:
                 self.initial_return = np.mean(train_returns)
             logs["Initial_DataCollection_AverageReturn"] = self.initial_return
+            self.return_history.append(np.mean(eval_returns))
+            logs['Eval_History_MaxReturn'] = max(self.return_history)
 
             # perform the logging
             for key, value in logs.items():
