@@ -43,9 +43,10 @@ class ACAgent(BaseAgent):
         
         loss = OrderedDict()
         #!!!
-        loss['Critic_Loss'] = TODO
-        loss['Actor_Loss'] = TODO
-
+        for i in np.arange(agent_params['num_critic_updates_per_agent_update']):
+            loss['Critic_Loss'] = self.critic.update(ob_no, ac_na, re_n, next_ob_no, terminal_n)
+            advantage = self.estimate_advantage(ob_no, next_ob_no, re_n, terminal_n)
+            loss['Actor_Loss'] = self.actor.update(ob_no, ac_na, adv_n=advantage)
         #!!!
         return loss
 
