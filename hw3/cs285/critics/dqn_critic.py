@@ -67,7 +67,7 @@ class DQNCritic(BaseCritic):
         
         # TODO compute the Q-values from the target network 
         #!!!
-        qa_tp1_values = self.q_net_target(ob_no)
+        qa_tp1_values = self.q_net_target(next_ob_no)
         #!!!
 
         if self.double_q:
@@ -77,10 +77,12 @@ class DQNCritic(BaseCritic):
             # target Q-network. Please review Lecture 8 for more details,
             # and page 4 of https://arxiv.org/pdf/1509.06461.pdf is also a good reference.
             #!!!
-            TODO
+            _, argmax = self.q_net(next_ob_no).max(dim=1)
+            q_tp1 = torch.gather(qa_tp1_values, 1, argmax.unsqueeze(1)).squeeze(1)
             #!!!
         else:
             q_tp1, _ = qa_tp1_values.max(dim=1)
+            
 
         # TODO compute targets for minimizing Bellman error
         # HINT: as you saw in lecture, this would be:

@@ -40,10 +40,13 @@ class ACAgent(BaseAgent):
         # for agent_params['num_actor_updates_per_agent_update'] steps,
         #     update the actor
 
+        
         loss = OrderedDict()
+        #!!!
         loss['Critic_Loss'] = TODO
         loss['Actor_Loss'] = TODO
 
+        #!!!
         return loss
 
     def estimate_advantage(self, ob_no, next_ob_no, re_n, terminal_n):

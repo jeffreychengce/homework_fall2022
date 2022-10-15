@@ -9,6 +9,7 @@ class ArgMaxPolicy(object):
     def get_action(self, obs):
         if len(obs.shape) > 3:
             observation = obs
+            
         else:
             observation = obs[None]
         
