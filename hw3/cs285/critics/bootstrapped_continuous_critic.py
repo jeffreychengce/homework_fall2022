@@ -1,3 +1,4 @@
+from symbol import term
 from .base_critic import BaseCritic
 from torch import nn
 from torch import optim
@@ -85,5 +86,31 @@ class BootstrappedContinuousCritic(nn.Module, BaseCritic):
         #       to 0) when a terminal state is reached
         # HINT: make sure to squeeze the output of the critic_network to ensure
         #       that its dimensions match the reward
+        #!!!
+        ob_no = ptu.from_numpy(ob_no)
+        ac_na = ptu.from_numpy(ac_na)#.to(torch.long)
+        next_ob_no = ptu.from_numpy(next_ob_no)
+        reward_n = ptu.from_numpy(reward_n)
+        terminal_n = ptu.from_numpy(terminal_n)
+
+        for i in range(self.num_target_updates):
+            value_tp1 = self.forward(next_ob_no)
+
+            target = reward_n + self.gamma*value_tp1*(1-terminal_n)
+            target = target.detach()
+
+            for j in range(self.num_grad_steps_per_target_update):
+
+                q_t_values = self.forward(ob_no)
+
+                assert value_tp1.shape == reward_n.shape
+                assert q_t_values.shape == reward_n.shape
+                loss = self.loss(q_t_values, target)
+                #print("critic loss:", loss)
+
+                self.optimizer.zero_grad()
+                loss.backward()
+                self.optimizer.step()
+        #!!!
 
         return loss.item()

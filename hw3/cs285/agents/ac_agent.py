@@ -6,7 +6,9 @@ from cs285.infrastructure.replay_buffer import ReplayBuffer
 from cs285.infrastructure.utils import *
 from cs285.policies.MLP_policy import MLPPolicyAC
 from .base_agent import BaseAgent
-
+#!!!
+from cs285.infrastructure import pytorch_util as ptu
+#!!!
 
 class ACAgent(BaseAgent):
     def __init__(self, env, agent_params):
@@ -42,11 +44,15 @@ class ACAgent(BaseAgent):
 
         loss = OrderedDict()
         #!!!
-        for i in np.arange(agent_params['num_critic_updates_per_agent_update']):
-            loss['Critic_Loss'] = self.critic.update(ob_no, ac_na, re_n, next_ob_no, terminal_n)
-            advantage = self.estimate_advantage(ob_no, next_ob_no, re_n, terminal_n)
+        for i in range(self.agent_params['num_critic_updates_per_agent_update']):
+            loss['Critic_Loss'] = self.critic.update(ob_no, ac_na, next_ob_no, re_n, terminal_n)
+
+        advantage = self.estimate_advantage(ob_no, next_ob_no, re_n, terminal_n)
+
+        for i in range(self.agent_params['num_actor_updates_per_agent_update']):
             loss['Actor_Loss'] = self.actor.update(ob_no, ac_na, adv_n=advantage)
         #!!!
+        
         return loss
 
     def estimate_advantage(self, ob_no, next_ob_no, re_n, terminal_n):
@@ -58,15 +64,17 @@ class ACAgent(BaseAgent):
         # 4) calculate advantage (adv_n) as A(s, a) = Q(s, a) - V(s)
 
         #!!!
+        ob_no = ptu.from_numpy(ob_no)
+        next_ob_no = ptu.from_numpy(next_ob_no)
+        re_n = ptu.from_numpy(re_n)
+        terminal_n = ptu.from_numpy(terminal_n)
+
         value_t = self.critic.forward(ob_no)
 
-        if terminal_n:
-            value_tp1 = 0
-        else:
-            value_tp1 = self.critic.forward(next_ob_no)
+        value_tp1 = self.critic.forward(next_ob_no)
 
-        q = re_n + self.gamma*value_tp1
-        adv_n = q-value_t
+        adv_n = re_n + self.gamma*value_tp1*(1-terminal_n) - value_t
+        adv_n = ptu.to_numpy(adv_n)
         #!!!
 
         if self.standardize_advantages:

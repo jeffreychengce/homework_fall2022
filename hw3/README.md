@@ -37,3 +37,7 @@ You may also want to look through [scripts/run_hw3_dqn.py](cs285/scripts/run_hw3
 
 See the [assignment PDF](cs285_hw3.pdf) for more details on what files to edit.
 
+1-1: 9
+100-1: 200 in 40, drop at 70
+1-100: 200 in 40
+10-10: 200 in 20, drop at 80

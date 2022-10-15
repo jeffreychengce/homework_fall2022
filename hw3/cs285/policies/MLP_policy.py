@@ -149,6 +149,7 @@ class MLPPolicyAC(MLPPolicy):
         negative_likelihoods = logits.log_prob(actions)
         weighted_negative_likelihoods = -torch.mul(negative_likelihoods, advantages)
         loss = torch.mean(weighted_negative_likelihoods)
+        #print("actor loss:", loss)
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
