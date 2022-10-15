@@ -40,7 +40,6 @@ class ACAgent(BaseAgent):
         # for agent_params['num_actor_updates_per_agent_update'] steps,
         #     update the actor
 
-        
         loss = OrderedDict()
         #!!!
         for i in np.arange(agent_params['num_critic_updates_per_agent_update']):
@@ -57,7 +56,18 @@ class ACAgent(BaseAgent):
         # 3) estimate the Q value as Q(s, a) = r(s, a) + gamma*V(s')
         # HINT: Remember to cut off the V(s') term (ie set it to 0) at terminal states (ie terminal_n=1)
         # 4) calculate advantage (adv_n) as A(s, a) = Q(s, a) - V(s)
-        adv_n = TODO
+
+        #!!!
+        value_t = self.critic.forward(ob_no)
+
+        if terminal_n:
+            value_tp1 = 0
+        else:
+            value_tp1 = self.critic.forward(next_ob_no)
+
+        q = re_n + self.gamma*value_tp1
+        adv_n = q-value_t
+        #!!!
 
         if self.standardize_advantages:
             adv_n = (adv_n - np.mean(adv_n)) / (np.std(adv_n) + 1e-8)
