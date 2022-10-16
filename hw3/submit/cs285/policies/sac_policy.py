@@ -36,29 +36,11 @@ class MLPPolicySAC(MLPPolicy):
     @property
     def alpha(self):
         # TODO: Formulate entropy term
-        #!!!
-        entropy = self.log_alpha.exp()
-        #!!!
         return entropy
 
     def get_action(self, obs: np.ndarray, sample=True) -> np.ndarray:
         # TODO: return sample from distribution if sampling
-        # if not sampling return the mean of the distribution
-        
-        #!!!
-        # if len(obs.shape) > 1:
-        #     observation = obs
-        # else:
-        #     observation = obs[None]
-
-        # return the action that the policy prescribes
-        observation = ptu.from_numpy(observation.astype(np.float32))
-        if sample:
-            action = ptu.to_numpy(action.sample())
-        else:
-            action = ptu.to_numpy(action.mean())
-        #!!!
-
+        # if not sampling return the mean of the distribution 
         return action
 
     # This function defines the forward pass of the network.

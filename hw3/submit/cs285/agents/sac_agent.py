@@ -4,7 +4,6 @@ from cs285.critics.bootstrapped_continuous_critic import \
     BootstrappedContinuousCritic
 from cs285.infrastructure.replay_buffer import ReplayBuffer
 from cs285.infrastructure.utils import *
-from cs285.infrastructure.sac_utils import *
 from cs285.policies.MLP_policy import MLPPolicyAC
 from .base_agent import BaseAgent
 import gym
@@ -54,11 +53,7 @@ class SACAgent(BaseAgent):
         # 3. Optimize the critic  
 
         #!!!
-        alpha = self.actor.alpha
-        q_tp1 = min(self.critic_target(next_ob_no, ac_na))
-        v_target = re_n + self.gamma*(1-terminal_n)*(q_tp1-alpha*self.actor(next_ob_no,ac_na))
-        q_t = self.critic(ob_no, ac_na)[0]
-
+        q_target = self.critic_target(ob_no, ac_na)
         #!!!
 
         return critic_loss
@@ -79,12 +74,10 @@ class SACAgent(BaseAgent):
         # 4. gather losses for logging
         loss = OrderedDict()
         #!!!
-        for i in range(agent_params['num_critic_updates_per_agent_update']):
-            loss['Critic_Loss'] = self.update_critic(ob_no, ac_na, next_ob_no, re_n, terminal_n)
-            if (i % self.critic_target_update_frequency) == 0:
-                soft_update_params(self.critic, self.critic_target, self.critic_tau)
-            if (i % self.actor_update_frequency) == 0:
-                loss['Actor_Loss'], loss['Alpha_Loss'], loss['Temperature'] = self.actor.update(ob_no, self.critic)
+        loss['Critic_Loss'] = TODO
+        loss['Actor_Loss'] = TODO
+        loss['Alpha_Loss'] = TODO
+        loss['Temperature'] = TODO
         #!!!
 
         return loss
