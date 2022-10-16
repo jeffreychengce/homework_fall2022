@@ -1,4 +1,5 @@
 from cs285.policies.MLP_policy import MLPPolicy
+from hw3.cs285.infrastructure.sac_utils import SquashedNormal
 import torch
 import numpy as np
 from cs285.infrastructure import sac_utils
@@ -52,7 +53,8 @@ class MLPPolicySAC(MLPPolicy):
         #     observation = obs[None]
 
         # return the action that the policy prescribes
-        observation = ptu.from_numpy(observation.astype(np.float32))
+        observation = ptu.from_numpy(obs.astype(np.float32))
+        action = self(observation)
         if sample:
             action = ptu.to_numpy(action.sample())
         else:
@@ -72,10 +74,46 @@ class MLPPolicySAC(MLPPolicy):
         # HINT: 
         # You will need to clip log values
         # You will need SquashedNormal from sac_utils file 
+
+        #!!!
+        if self.discrete:
+            logits = self.logits_na(observation)
+            action_distribution = distributions.Categorical(logits=logits)
+            print("discrete???")
+            raise NotImplementedError
+        else:
+            batch_mean = self.mean_net(observation)
+            scale_tril = torch.diag(torch.exp(self.logstd))
+            batch_dim = batch_mean.shape[0]
+            batch_scale_tril = scale_tril.repeat(batch_dim, 1, 1)
+            batch_scale_tril_clipped = torch.clamp(batch_scale_tril, min=self.log_std_bounds[0], max=self.log_std_bounds[1])
+            action_distribution = SquashedNormal(
+                batch_mean,
+                scale_tril=batch_scale_tril,
+            )
+        #!!!
+
         return action_distribution
 
     def update(self, obs, critic):
         # TODO Update actor network and entropy regularizer
         # return losses and alpha value
+
+        #!!
+        actions = self(obs)
+        q1, q2 = critic(obs, actions)
+        q = torch.min(q1,q2)
+
+        log_probs = TODO
+        actor_loss = torch.mean(self.alpha * log_probs - q)
+        self.optimizer.zero_grad()
+        actor_loss.backward()
+        self.optimizer.step()
+
+        alpha_loss = nn.MSELoss(self.target_entropy, self.alpha)
+        self.log_alpha_optimizer.zero_grad()
+        alpha_loss.backward()
+        self.log_alpha_optimizer.step()
+        #!!
 
         return actor_loss, alpha_loss, self.alpha

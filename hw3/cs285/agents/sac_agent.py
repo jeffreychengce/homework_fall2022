@@ -55,9 +55,18 @@ class SACAgent(BaseAgent):
 
         #!!!
         alpha = self.actor.alpha
-        q_tp1 = min(self.critic_target(next_ob_no, ac_na))
-        v_target = re_n + self.gamma*(1-terminal_n)*(q_tp1-alpha*self.actor(next_ob_no,ac_na))
-        q_t = self.critic(ob_no, ac_na)[0]
+        q_tp1_1, q_tp1_2 = self.critic_target(next_ob_no, ac_na)
+        q_tp1 = min(q_tp1_1, q_tp1_2)
+        target = re_n + self.gamma*(1-terminal_n)*(q_tp1-alpha*self.actor(next_ob_no,ac_na))
+        target = target.detach()
+
+        q_t_1, q_t_2 = self.critic(ob_no, ac_na)
+        q_t = (q_t_1+q_t_2)/2
+
+        critic_loss = self.critic.loss(target, q_t)
+        self.critic.optimizer.zero_grad()
+        critic_loss.backward()
+        self.critic.optimizer.step()
 
         #!!!
 
