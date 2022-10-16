@@ -110,7 +110,8 @@ class SACAgent(BaseAgent):
             if (i % self.critic_target_update_frequency) == 0:
                 soft_update_params(self.critic, self.critic_target, self.critic_tau)
             if (i % self.actor_update_frequency) == 0:
-                loss['Actor_Loss'], loss['Alpha_Loss'], loss['Temperature'] = self.actor.update(ob_no, self.critic)
+                for j in range(self.agent_params['num_actor_updates_per_agent_update']):
+                    loss['Actor_Loss'], loss['Alpha_Loss'], loss['Temperature'] = self.actor.update(ob_no, self.critic)
         #!!!
 
         return loss

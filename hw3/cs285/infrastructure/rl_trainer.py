@@ -257,7 +257,6 @@ class RL_Trainer(object):
 
 
                 action = self.agent.actor.get_action(obs)[0]
-                print(action.shape)
                 next_obs, rew, done, _ = self.env.step(action)
 
                 episode_return += rew
