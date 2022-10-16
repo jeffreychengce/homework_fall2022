@@ -1,5 +1,5 @@
 from cs285.policies.MLP_policy import MLPPolicy
-from hw3.cs285.infrastructure.sac_utils import SquashedNormal
+from cs285.infrastructure.sac_utils import SquashedNormal
 import torch
 import numpy as np
 from cs285.infrastructure import sac_utils
@@ -89,7 +89,7 @@ class MLPPolicySAC(MLPPolicy):
             batch_scale_tril_clipped = torch.clamp(batch_scale_tril, min=self.log_std_bounds[0], max=self.log_std_bounds[1])
             action_distribution = SquashedNormal(
                 batch_mean,
-                scale_tril=batch_scale_tril,
+                batch_scale_tril_clipped,
             )
         #!!!
 
