@@ -255,8 +255,9 @@ class RL_Trainer(object):
                     episode_step = 0
                     episode_return = 0
 
-                action, _ = self.agent.actor.get_action(obs)#[0]
-                action = action[0]
+
+                action = self.agent.actor.get_action(obs)[0]
+                print(action.shape)
                 next_obs, rew, done, _ = self.env.step(action)
 
                 episode_return += rew
@@ -341,6 +342,7 @@ class RL_Trainer(object):
             all_logs.append(train_log)
             print("Critic Loss:", train_log['Critic_Loss'])
             print("Actor Loss:", train_log['Actor_Loss'])
+            print("Alpha Loss:", train_log['Alpha_Loss'])
             print("")
         return all_logs
         #!!!      

@@ -1,3 +1,4 @@
+from distutils import log
 from cs285.policies.MLP_policy import MLPPolicy
 from cs285.infrastructure.sac_utils import SquashedNormal
 import torch
@@ -47,20 +48,16 @@ class MLPPolicySAC(MLPPolicy):
         # if not sampling return the mean of the distribution
         
         #!!!
-        # if len(obs.shape) > 1:
-        #     observation = obs
-        # else:
-        #     observation = obs[None]
 
         # return the action that the policy prescribes
         observation = ptu.from_numpy(obs.astype(np.float32))
-        action_distribution, logprobs = self(observation)
+        action_distribution = self(observation)
         if sample:
-            action = ptu.to_numpy(action_distribution.sample())
+            action = ptu.to_numpy(action_distribution.rsample())
         else:
             action = ptu.to_numpy(action_distribution.mean)
         #!!!
-        return action, logprobs
+        return action
 
     # This function defines the forward pass of the network.
     # You can return anything you want, but you should be able to differentiate
@@ -93,17 +90,18 @@ class MLPPolicySAC(MLPPolicy):
             )
         #!!!
         
-        return action_distribution, batch_scale_tril_clipped
+        return action_distribution
 
     def update(self, obs, critic):
         # TODO Update actor network and entropy regularizer
         # return losses and alpha value
 
         #!!
-        actions, logprobs = self.get_action(obs)
         obs = ptu.from_numpy(obs)
-        actions = ptu.from_numpy(actions)
-        q1, q2 = critic(obs, actions)
+        action_distribution = self(obs)
+        action = action_distribution.rsample()
+        logprobs = action_distribution.log_prob(action)
+        q1, q2 = critic(obs, action)
         q = torch.min(q1,q2)
 
         assert logprobs.shape == q.shape
@@ -113,7 +111,8 @@ class MLPPolicySAC(MLPPolicy):
         self.optimizer.step()
 
         #alpha_loss_fn = nn.MSELoss()
-        alpha_loss = torch.square(self.target_entropy-self.log_alpha)
+        logprobs = logprobs.detach()
+        alpha_loss = torch.mean(-self.alpha*logprobs-self.alpha*self.target_entropy)
         self.log_alpha_optimizer.zero_grad()
         alpha_loss.backward()
         self.log_alpha_optimizer.step()
