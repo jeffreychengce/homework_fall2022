@@ -218,7 +218,7 @@ class RL_Trainer(object):
         episode_stats = {'reward': [], 'ep_len': []}
 
         done = False
-        print_period = 1000
+        print_period = 1
 
         for itr in range(n_iter):
             if itr % print_period == 0:
@@ -255,7 +255,8 @@ class RL_Trainer(object):
                     episode_step = 0
                     episode_return = 0
 
-                action = self.agent.actor.get_action(obs)[0]
+                action, _ = self.agent.actor.get_action(obs)#[0]
+                action = action[0]
                 next_obs, rew, done, _ = self.env.step(action)
 
                 episode_return += rew
@@ -338,6 +339,9 @@ class RL_Trainer(object):
                 ob_batch, ac_batch, re_batch, next_ob_batch, terminal_batch
             )
             all_logs.append(train_log)
+            print("Critic Loss:", train_log['Critic_Loss'])
+            print("Actor Loss:", train_log['Actor_Loss'])
+            print("")
         return all_logs
         #!!!      
 
