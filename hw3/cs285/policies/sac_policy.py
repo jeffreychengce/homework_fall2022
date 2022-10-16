@@ -54,14 +54,14 @@ class MLPPolicySAC(MLPPolicy):
 
         # return the action that the policy prescribes
         observation = ptu.from_numpy(obs.astype(np.float32))
-        action = self(observation)
+        action, logprobs = self(observation)
         if sample:
             action = ptu.to_numpy(action.sample())
         else:
             action = ptu.to_numpy(action.mean())
         #!!!
 
-        return action
+        return action, logprobs
 
     # This function defines the forward pass of the network.
     # You can return anything you want, but you should be able to differentiate
@@ -85,7 +85,7 @@ class MLPPolicySAC(MLPPolicy):
             batch_mean = self.mean_net(observation)
             scale_tril = torch.diag(torch.exp(self.logstd))
             batch_dim = batch_mean.shape[0]
-            batch_scale_tril = scale_tril.repeat(batch_dim, 1, 1)
+            batch_scale_tril = scale_tril.repeat(batch_dim, 1)
             batch_scale_tril_clipped = torch.clamp(batch_scale_tril, min=self.log_std_bounds[0], max=self.log_std_bounds[1])
             action_distribution = SquashedNormal(
                 batch_mean,
@@ -93,19 +93,19 @@ class MLPPolicySAC(MLPPolicy):
             )
         #!!!
 
-        return action_distribution
+        return action_distribution, batch_scale_tril_clipped
 
     def update(self, obs, critic):
         # TODO Update actor network and entropy regularizer
         # return losses and alpha value
 
         #!!
-        actions = self(obs)
+        actions, logprobs = self(obs)
         q1, q2 = critic(obs, actions)
         q = torch.min(q1,q2)
 
-        log_probs = TODO
-        actor_loss = torch.mean(self.alpha * log_probs - q)
+        assert logprobs.shape == q.shape
+        actor_loss = torch.mean(self.alpha * logprobs - q)
         self.optimizer.zero_grad()
         actor_loss.backward()
         self.optimizer.step()

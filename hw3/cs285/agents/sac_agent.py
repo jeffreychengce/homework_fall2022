@@ -55,17 +55,18 @@ class SACAgent(BaseAgent):
         # 3. Optimize the critic  
 
         #!!!
-        ob_no = ptu.from_numpy(ob_no)
-        ac_na = ptu.from_numpy(ac_na)
-        next_ob_no = ptu.from_numpy(next_ob_no)
-        re_n = ptu.from_numpy(re_n)
-        terminal_n = ptu.from_numpy(terminal_n)
+        # ob_no = ptu.from_numpy(ob_no)
+        # ac_na = ptu.from_numpy(ac_na)
+        # next_ob_no = ptu.from_numpy(next_ob_no)
+        # re_n = ptu.from_numpy(re_n)
+        # terminal_n = ptu.from_numpy(terminal_n)
 
         # calculate target value
         alpha = self.actor.alpha
         q_tp1_1, q_tp1_2 = self.critic_target(next_ob_no, ac_na)
         q_tp1 = torch.min(q_tp1_1, q_tp1_2)
-        target = re_n + self.gamma*(1-terminal_n)*(q_tp1-alpha*self.actor.get_action(ptu.to_numpy(next_ob_no)))#,ac_na))
+        action, _ = self.actor.get_action(next_ob_no)
+        target = re_n + self.gamma*(1-terminal_n)*(q_tp1-alpha*action)
         target = target.detach()
 
         # calculate q value
