@@ -2,9 +2,9 @@ import shlex, subprocess
 
 commands = []
 
-commands.append("python ./cs285/scripts/run_hw3_dqn.py --env_name LunarLander-v3 --eval_batch_size 100 --exp_name q3_hparam1")
-commands.append("python ./cs285/scripts/run_hw3_dqn.py --env_name LunarLander-v3 --eval_batch_size 5000 --exp_name q3_hparam2")
-commands.append("python ./cs285/scripts/run_hw3_dqn.py --env_name LunarLander-v3 --eval_batch_size 20000 --exp_name q3_hparam3")
+commands.append("python ./cs285/scripts/run_hw3_dqn.py --env_name LunarLander-v3 --batch_size 16 --exp_name q3_hparam1")
+commands.append("python ./cs285/scripts/run_hw3_dqn.py --env_name LunarLander-v3 --batch_size 128 --exp_name q3_hparam2")
+commands.append("python ./cs285/scripts/run_hw3_dqn.py --env_name LunarLander-v3 --batch_size 2048 --exp_name q3_hparam3")
 
 
 if __name__ == "__main__":

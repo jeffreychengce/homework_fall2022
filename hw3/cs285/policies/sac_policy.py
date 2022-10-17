@@ -85,12 +85,14 @@ class MLPPolicySAC(MLPPolicy):
             std = logstd_clipped.exp()
             std = std.repeat(batch_dim, 1)
             
-            scale_tril = torch.diag(torch.exp(logstd_clipped))
-            batch_scale_tril = scale_tril.repeat(batch_dim, 1)
+            #scale_tril = torch.diag(torch.exp(logstd_clipped))
+            #batch_scale_tril = scale_tril.repeat(batch_dim, 1)
 
+            #print(std.shape)
+            #print(scale_tril.shape)
             action_distribution = SquashedNormal(
                 batch_mean,
-                batch_scale_tril,
+                std,
             )
         #!!!
         
@@ -104,10 +106,28 @@ class MLPPolicySAC(MLPPolicy):
         obs = ptu.from_numpy(obs)
         action_distribution = self(obs)
         action = action_distribution.rsample()
+        #actions = action_distribution.rsample((10,))
+        #print(action.shape)
+        #print(actions.shape)
         logprobs = action_distribution.log_prob(action).sum(dim=1).unsqueeze(1)
+        #logprobs = action_distribution.log_prob(actions).mean(dim=0)#.unsqueeze(1).unsqueeze(1)
+        #print(logprobs.shape)
+        #print(obs.shape)
         logprobs_alpha = logprobs.detach().clone()
+        # for i in range(actions.shape[0]):
+        #     q1,q2 = critic(obs, actions[i,:,:])
+        #     if i == 0:
+        #         #q_sum = q1+q2
+        #         q_min = torch.minimum(q1,q2)
+        #     else:
+        #         #q_sum = q_sum+q1+q2
+        #         q_min = torch.minimum(q_min, q1)
+        #         q_min = torch.minimum(q_min, q2)
         q1, q2 = critic(obs, action)
         q = torch.min(q1,q2)
+        #q = q_min
+        #print(q1.shape)
+        #print(q.shape)
 
         assert logprobs.shape == q.shape
         actor_loss = torch.mean(self.alpha*logprobs - q)
