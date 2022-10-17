@@ -79,14 +79,17 @@ class MLPPolicySAC(MLPPolicy):
             raise NotImplementedError
         else:
             batch_mean = self.mean_net(observation)
-            scale_tril = torch.diag(torch.exp(self.logstd))
+            logstd_clipped = torch.clamp(self.logstd, min=self.log_std_bounds[0], max=self.log_std_bounds[1])
+            std = logstd_clipped.exp()
             batch_dim = batch_mean.shape[0]
-            batch_scale_tril = scale_tril.repeat(batch_dim, 1)
-            batch_scale_tril_clipped = torch.clamp(batch_scale_tril, min=self.log_std_bounds[0], max=self.log_std_bounds[1])
-            
+            std = std.repeat(batch_dim, 1)
+            # scale_tril = torch.diag(torch.exp(logstd_clipped))
+            # batch_dim = batch_mean.shape[0]
+            # batch_scale_tril = scale_tril.repeat(batch_dim, 1)
+            # batch_scale_tril_clipped = torch.clamp(batch_scale_tril, min=self.log_std_bounds[0], max=self.log_std_bounds[1])
             action_distribution = SquashedNormal(
                 batch_mean,
-                batch_scale_tril_clipped,
+                std,
             )
         #!!!
         

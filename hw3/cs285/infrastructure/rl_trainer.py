@@ -221,7 +221,7 @@ class RL_Trainer(object):
         print_period = 1
 
         for itr in range(n_iter):
-            if itr % print_period == 0:
+            if itr % print_period == 0 and itr % self.params['scalar_log_freq'] == 0:
                 print("\n\n********** Iteration %i ************"%itr)
 
             # decide if videos should be rendered/logged at this iteration
@@ -275,8 +275,8 @@ class RL_Trainer(object):
             self.agent.add_to_replay_buffer(paths)
 
             # train agent (using sampled data from replay buffer)
-            if itr % print_period == 0:
-                print("\nTraining agent...")
+            # if itr % print_period == 0:
+            #     print("\nTraining agent...")
             all_logs = self.train_agent()
 
             # log/save
@@ -339,10 +339,10 @@ class RL_Trainer(object):
                 ob_batch, ac_batch, re_batch, next_ob_batch, terminal_batch
             )
             all_logs.append(train_log)
-            print("Critic Loss:", train_log['Critic_Loss'])
-            print("Actor Loss:", train_log['Actor_Loss'])
-            print("Alpha Loss:", train_log['Alpha_Loss'])
-            print("")
+            # print("Critic Loss:", train_log['Critic_Loss'])
+            # print("Actor Loss:", train_log['Actor_Loss'])
+            # print("Alpha Loss:", train_log['Alpha_Loss'])
+            # print("")
         return all_logs
         #!!!      
 

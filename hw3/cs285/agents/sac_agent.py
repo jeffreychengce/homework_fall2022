@@ -61,10 +61,12 @@ class SACAgent(BaseAgent):
         re_n = ptu.from_numpy(re_n)
         terminal_n = ptu.from_numpy(terminal_n)
 
-        # calculate target value
+        # calculate target Q value
         alpha = self.actor.alpha
         q_tp1_1, q_tp1_2 = self.critic_target(ptu.from_numpy(next_ob_no), ptu.from_numpy(ac_na))
         q_tp1 = torch.min(q_tp1_1, q_tp1_2)
+
+        # get next action logprob
         action = self.actor.get_action(next_ob_no)
         action_distribution = self.actor(ptu.from_numpy(next_ob_no))
         action_logprob = action_distribution.log_prob(ptu.from_numpy(action))
@@ -72,6 +74,8 @@ class SACAgent(BaseAgent):
 
         q_tp1 = q_tp1.squeeze(1)
         action_logprob = action_logprob.squeeze(1)
+
+        # calculate target
         target = re_n + self.gamma*(1-terminal_n)*(q_tp1-alpha*action_logprob)
         target = target.detach()
 
@@ -107,8 +111,10 @@ class SACAgent(BaseAgent):
         #!!!
         for i in range(self.agent_params['num_critic_updates_per_agent_update']):
             loss['Critic_Loss'] = self.update_critic(ob_no, ac_na, next_ob_no, re_n, terminal_n)
+            
             if (i % self.critic_target_update_frequency) == 0:
                 soft_update_params(self.critic, self.critic_target, self.critic_tau)
+            
             if (i % self.actor_update_frequency) == 0:
                 for j in range(self.agent_params['num_actor_updates_per_agent_update']):
                     loss['Actor_Loss'], loss['Alpha_Loss'], loss['Temperature'] = self.actor.update(ob_no, self.critic)
