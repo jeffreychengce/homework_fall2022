@@ -28,20 +28,40 @@ def get_section_results(file):
                 Z.append(v.simple_value)
     return X, Y, Z
 
+def get_section_results_mean(file):
+    """
+        requires tensorflow==1.12.0
+    """
+    X = []
+    Y = []
+    Z = []
+    for e in tf.compat.v1.train.summary_iterator(file):
+        for v in e.summary.value:
+            if v.tag == 'Train_EnvstepsSoFar':
+                X.append(v.simple_value)
+            elif v.tag == 'Train_AverageReturn':
+                Y.append(v.simple_value)
+            elif v.tag == 'Train_BestReturn':
+                Z.append(v.simple_value)
+    return X, Y, Z
+
 
 #%% q1
 q1 = glob.glob('**/q1_MsPacman-v0_13-10-2022_22-59-43/*')[0]
 
-_, q1_returns, _ = get_section_results(q1)
+steps, q1_returns, q1_means = get_section_results_mean(q1)
 
-
+steps = steps[2:]
+q1_returns = q1_returns[1:]
 
 itr = np.arange(len(q1_returns))*1000
 
 fig1 = plt.figure()
-plt.plot(itr, q1_returns)
+plt.plot(steps, q1_returns, label="Mean Epoch Reward")
+plt.plot(steps, q1_means, label="Best Mean Reward")
+plt.legend(loc = "lower right")
 plt.xlabel('Iteration')
-plt.ylabel('Average Training Return')
+plt.ylabel('Return')
 plt.title('MsPacman DQN Learning Curve')
 fig1.set_size_inches(10, 6)
 plt.show()
@@ -60,9 +80,9 @@ steps,q2_dqn1_returns,_ = get_section_results(q2_dqn1)
 _,q2_dqn2_returns,_ = get_section_results(q2_dqn2)
 _,q2_dqn3_returns,_ = get_section_results(q2_dqn3)
 
-_,q2_ddqn1_returns,_ = get_section_results(q2_dqn1)
-_,q2_ddqn2_returns,_ = get_section_results(q2_dqn2)
-_,q2_ddqn3_returns,_ = get_section_results(q2_dqn3)
+_,q2_ddqn1_returns,_ = get_section_results(q2_ddqn1)
+_,q2_ddqn2_returns,_ = get_section_results(q2_ddqn2)
+_,q2_ddqn3_returns,_ = get_section_results(q2_ddqn3)
 
 steps = np.array(steps)-1
 steps = steps[1:]
