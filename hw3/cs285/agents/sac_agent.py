@@ -59,30 +59,27 @@ class SACAgent(BaseAgent):
         # ac_na = ptu.from_numpy(ac_na)
         # next_ob_no = ptu.from_numpy(next_ob_no)
         re_n = ptu.from_numpy(re_n)
+        re_n = re_n.unsqueeze(1)
         terminal_n = ptu.from_numpy(terminal_n)
+        terminal_n = terminal_n.unsqueeze(1)
 
         # calculate target Q value
         alpha = self.actor.alpha
-        q_tp1_1, q_tp1_2 = self.critic_target(ptu.from_numpy(next_ob_no), ptu.from_numpy(ac_na))
+        next_action = self.actor.get_action(next_ob_no)
+        next_action_distribution = self.actor(ptu.from_numpy(next_ob_no))
+        next_action_logprob = next_action_distribution.log_prob(ptu.from_numpy(next_action))
+        q_tp1_1, q_tp1_2 = self.critic_target(ptu.from_numpy(next_ob_no), ptu.from_numpy(next_action))
         q_tp1 = torch.min(q_tp1_1, q_tp1_2)
-
-        # get next action logprob
-        action = self.actor.get_action(next_ob_no)
-        action_distribution = self.actor(ptu.from_numpy(next_ob_no))
-        action_logprob = action_distribution.log_prob(ptu.from_numpy(action))
-        #action_logprob = ptu.from_numpy(action_logprob)
-
-        q_tp1 = q_tp1.squeeze(1)
-        action_logprob = action_logprob.squeeze(1)
+        V_tp1 = q_tp1 - alpha * next_action_logprob
 
         # calculate target
-        target = re_n + self.gamma*(1-terminal_n)*(q_tp1-alpha*action_logprob)
+        target = re_n + self.gamma*(1-terminal_n)*V_tp1
         target = target.detach()
 
         # calculate q value
         q_t_1, q_t_2 = self.critic(ptu.from_numpy(ob_no), ptu.from_numpy(ac_na))
         q_t = (q_t_1+q_t_2)/2
-        q_t = q_t.squeeze(1)
+        #q_t = q_t.squeeze(1)
 
         # update critic
         critic_loss = self.critic.loss(target, q_t)
