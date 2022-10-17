@@ -79,17 +79,18 @@ class MLPPolicySAC(MLPPolicy):
             raise NotImplementedError
         else:
             batch_mean = self.mean_net(observation)
-            logstd_clipped = torch.clamp(self.logstd, min=self.log_std_bounds[0], max=self.log_std_bounds[1])
-            std = logstd_clipped.exp()
             batch_dim = batch_mean.shape[0]
+            logstd_clipped = torch.clamp(self.logstd, min=self.log_std_bounds[0], max=self.log_std_bounds[1])
+            
+            std = logstd_clipped.exp()
             std = std.repeat(batch_dim, 1)
-            # scale_tril = torch.diag(torch.exp(logstd_clipped))
-            # batch_dim = batch_mean.shape[0]
-            # batch_scale_tril = scale_tril.repeat(batch_dim, 1)
-            # batch_scale_tril_clipped = torch.clamp(batch_scale_tril, min=self.log_std_bounds[0], max=self.log_std_bounds[1])
+            
+            scale_tril = torch.diag(torch.exp(logstd_clipped))
+            batch_scale_tril = scale_tril.repeat(batch_dim, 1)
+
             action_distribution = SquashedNormal(
                 batch_mean,
-                std,
+                batch_scale_tril,
             )
         #!!!
         
@@ -103,7 +104,8 @@ class MLPPolicySAC(MLPPolicy):
         obs = ptu.from_numpy(obs)
         action_distribution = self(obs)
         action = action_distribution.rsample()
-        logprobs = action_distribution.log_prob(action)
+        logprobs = action_distribution.log_prob(action).sum(dim=1).unsqueeze(1)
+        logprobs_alpha = logprobs.detach().clone()
         q1, q2 = critic(obs, action)
         q = torch.min(q1,q2)
 
@@ -114,8 +116,8 @@ class MLPPolicySAC(MLPPolicy):
         self.optimizer.step()
 
         #alpha_loss_fn = nn.MSELoss()
-        logprobs = logprobs.detach()
-        alpha_loss = torch.mean(-self.alpha*logprobs-self.alpha*self.target_entropy)
+        #logprobs = logprobs.detach()
+        alpha_loss = torch.mean(-self.alpha*logprobs_alpha-self.alpha*self.target_entropy)
         self.log_alpha_optimizer.zero_grad()
         alpha_loss.backward()
         self.log_alpha_optimizer.step()

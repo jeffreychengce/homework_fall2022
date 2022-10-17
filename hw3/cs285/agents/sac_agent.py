@@ -63,17 +63,19 @@ class SACAgent(BaseAgent):
         terminal_n = ptu.from_numpy(terminal_n)
         terminal_n = terminal_n.unsqueeze(1)
 
-        # calculate target Q value
+        # calculate target value
         alpha = self.actor.alpha
+
+        # sample next actions
         next_action = self.actor.get_action(next_ob_no)
         next_action_distribution = self.actor(ptu.from_numpy(next_ob_no))
         next_action_logprob = next_action_distribution.log_prob(ptu.from_numpy(next_action))
         q_tp1_1, q_tp1_2 = self.critic_target(ptu.from_numpy(next_ob_no), ptu.from_numpy(next_action))
         q_tp1 = torch.min(q_tp1_1, q_tp1_2)
-        V_tp1 = q_tp1 - alpha * next_action_logprob
+        v_tp1 = q_tp1 - alpha*next_action_logprob
 
         # calculate target
-        target = re_n + self.gamma*(1-terminal_n)*V_tp1
+        target = re_n + self.gamma*(1-terminal_n)*v_tp1
         target = target.detach()
 
         # calculate q value
@@ -82,7 +84,7 @@ class SACAgent(BaseAgent):
         #q_t = q_t.squeeze(1)
 
         # update critic
-        critic_loss = self.critic.loss(target, q_t)
+        critic_loss = 0.5*self.critic.loss(target, q_t)
         self.critic.optimizer.zero_grad()
         critic_loss.backward()
         self.critic.optimizer.step()
