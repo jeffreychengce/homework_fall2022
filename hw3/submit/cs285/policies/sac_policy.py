@@ -1,4 +1,6 @@
+from distutils import log
 from cs285.policies.MLP_policy import MLPPolicy
+from cs285.infrastructure.sac_utils import SquashedNormal
 import torch
 import numpy as np
 from cs285.infrastructure import sac_utils
@@ -36,11 +38,25 @@ class MLPPolicySAC(MLPPolicy):
     @property
     def alpha(self):
         # TODO: Formulate entropy term
+        #!!!
+        entropy = self.log_alpha.exp()
+        #!!!
         return entropy
 
     def get_action(self, obs: np.ndarray, sample=True) -> np.ndarray:
         # TODO: return sample from distribution if sampling
-        # if not sampling return the mean of the distribution 
+        # if not sampling return the mean of the distribution
+        
+        #!!!
+
+        # return the action that the policy prescribes
+        observation = ptu.from_numpy(obs.astype(np.float32))
+        action_distribution = self(observation)
+        if sample:
+            action = ptu.to_numpy(action_distribution.rsample())
+        else:
+            action = ptu.to_numpy(action_distribution.mean)
+        #!!!
         return action
 
     # This function defines the forward pass of the network.
@@ -54,10 +70,77 @@ class MLPPolicySAC(MLPPolicy):
         # HINT: 
         # You will need to clip log values
         # You will need SquashedNormal from sac_utils file 
+
+        #!!!
+        if self.discrete:
+            logits = self.logits_na(observation)
+            action_distribution = distributions.Categorical(logits=logits)
+            print("discrete???")
+            raise NotImplementedError
+        else:
+            batch_mean = self.mean_net(observation)
+            batch_dim = batch_mean.shape[0]
+            logstd_clipped = torch.clamp(self.logstd, min=self.log_std_bounds[0], max=self.log_std_bounds[1])
+            
+            std = logstd_clipped.exp()
+            std = std.repeat(batch_dim, 1)
+            
+            #scale_tril = torch.diag(torch.exp(logstd_clipped))
+            #batch_scale_tril = scale_tril.repeat(batch_dim, 1)
+
+            #print(std.shape)
+            #print(scale_tril.shape)
+            action_distribution = SquashedNormal(
+                batch_mean,
+                std,
+            )
+        #!!!
+        
         return action_distribution
 
     def update(self, obs, critic):
         # TODO Update actor network and entropy regularizer
         # return losses and alpha value
+
+        #!!
+        obs = ptu.from_numpy(obs)
+        action_distribution = self(obs)
+        action = action_distribution.rsample()
+        #actions = action_distribution.rsample((10,))
+        #print(action.shape)
+        #print(actions.shape)
+        logprobs = action_distribution.log_prob(action).sum(dim=1).unsqueeze(1)
+        #logprobs = action_distribution.log_prob(actions).mean(dim=0)#.unsqueeze(1).unsqueeze(1)
+        #print(logprobs.shape)
+        #print(obs.shape)
+        logprobs_alpha = logprobs.detach().clone()
+        # for i in range(actions.shape[0]):
+        #     q1,q2 = critic(obs, actions[i,:,:])
+        #     if i == 0:
+        #         #q_sum = q1+q2
+        #         q_min = torch.minimum(q1,q2)
+        #     else:
+        #         #q_sum = q_sum+q1+q2
+        #         q_min = torch.minimum(q_min, q1)
+        #         q_min = torch.minimum(q_min, q2)
+        q1, q2 = critic(obs, action)
+        q = torch.min(q1,q2)
+        #q = q_min
+        #print(q1.shape)
+        #print(q.shape)
+
+        assert logprobs.shape == q.shape
+        actor_loss = torch.mean(self.alpha*logprobs - q)
+        self.optimizer.zero_grad()
+        actor_loss.backward()
+        self.optimizer.step()
+
+        #alpha_loss_fn = nn.MSELoss()
+        #logprobs = logprobs.detach()
+        alpha_loss = torch.mean(-self.alpha*logprobs_alpha-self.alpha*self.target_entropy)
+        self.log_alpha_optimizer.zero_grad()
+        alpha_loss.backward()
+        self.log_alpha_optimizer.step()
+        #!!
 
         return actor_loss, alpha_loss, self.alpha

@@ -214,7 +214,9 @@ def eval_trajectory(env, policy, max_path_length, render=False, render_mode=('rg
                 time.sleep(env.model.opt.timestep)
         obs.append(ob)
         ac = policy.get_action(ob, sample=False)
-        ac = ac[0]
+        #!!!
+        #ac = ac[0]
+        #!!!
         acs.append(ac)
         ob, rew, done, _ = env.step(ac)
         # add the observation after taking a step to next_obs

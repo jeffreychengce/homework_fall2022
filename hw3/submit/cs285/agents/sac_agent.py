@@ -4,12 +4,14 @@ from cs285.critics.bootstrapped_continuous_critic import \
     BootstrappedContinuousCritic
 from cs285.infrastructure.replay_buffer import ReplayBuffer
 from cs285.infrastructure.utils import *
+from cs285.infrastructure.sac_utils import *
 from cs285.policies.MLP_policy import MLPPolicyAC
 from .base_agent import BaseAgent
 import gym
 from cs285.policies.sac_policy import MLPPolicySAC
 from cs285.critics.sac_critic import SACCritic
 import cs285.infrastructure.pytorch_util as ptu
+import torch
 
 class SACAgent(BaseAgent):
     def __init__(self, env: gym.Env, agent_params):
@@ -53,7 +55,39 @@ class SACAgent(BaseAgent):
         # 3. Optimize the critic  
 
         #!!!
-        q_target = self.critic_target(ob_no, ac_na)
+        # ob_no = ptu.from_numpy(ob_no)
+        # ac_na = ptu.from_numpy(ac_na)
+        # next_ob_no = ptu.from_numpy(next_ob_no)
+        re_n = ptu.from_numpy(re_n)
+        re_n = re_n.unsqueeze(1)
+        terminal_n = ptu.from_numpy(terminal_n)
+        terminal_n = terminal_n.unsqueeze(1)
+
+        # calculate target value
+        alpha = self.actor.alpha
+
+        # sample next actions
+        next_action = self.actor.get_action(next_ob_no)
+        next_action_distribution = self.actor(ptu.from_numpy(next_ob_no))
+        next_action_logprob = next_action_distribution.log_prob(ptu.from_numpy(next_action))
+        q_tp1_1, q_tp1_2 = self.critic_target(ptu.from_numpy(next_ob_no), ptu.from_numpy(next_action))
+        q_tp1 = torch.min(q_tp1_1, q_tp1_2)
+        v_tp1 = q_tp1 - alpha*next_action_logprob
+
+        # calculate target
+        target = re_n + self.gamma*(1-terminal_n)*v_tp1
+        target = target.detach()
+
+        # calculate q value
+        q_t_1, q_t_2 = self.critic(ptu.from_numpy(ob_no), ptu.from_numpy(ac_na))
+        q_t = (q_t_1+q_t_2)/2
+        #q_t = q_t.squeeze(1)
+
+        # update critic
+        critic_loss = 0.5*self.critic.loss(target, q_t)
+        self.critic.optimizer.zero_grad()
+        critic_loss.backward()
+        self.critic.optimizer.step()
         #!!!
 
         return critic_loss
@@ -74,10 +108,15 @@ class SACAgent(BaseAgent):
         # 4. gather losses for logging
         loss = OrderedDict()
         #!!!
-        loss['Critic_Loss'] = TODO
-        loss['Actor_Loss'] = TODO
-        loss['Alpha_Loss'] = TODO
-        loss['Temperature'] = TODO
+        for i in range(self.agent_params['num_critic_updates_per_agent_update']):
+            loss['Critic_Loss'] = self.update_critic(ob_no, ac_na, next_ob_no, re_n, terminal_n)
+            
+            if (i % self.critic_target_update_frequency) == 0:
+                soft_update_params(self.critic, self.critic_target, self.critic_tau)
+            
+            if (i % self.actor_update_frequency) == 0:
+                for j in range(self.agent_params['num_actor_updates_per_agent_update']):
+                    loss['Actor_Loss'], loss['Alpha_Loss'], loss['Temperature'] = self.actor.update(ob_no, self.critic)
         #!!!
 
         return loss

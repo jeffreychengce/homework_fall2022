@@ -88,6 +88,8 @@ steps = np.array(steps)-1
 steps = steps[1:]
 itr = np.arange(len(q1_returns))*1000
 
+q2_dqn_returns = (q2_dqn1_returns+q2_dqn2_returns+q2_dqn3_returns)/3
+
 fig1 = plt.figure()
 plt.plot(steps, q2_dqn1_returns, label='DQN Seed 1')
 plt.plot(steps, q2_dqn2_returns, label='DQN Seed 2')
