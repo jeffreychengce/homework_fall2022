@@ -195,7 +195,7 @@ plt.show()
 
 #%% q6
 
-q6_pendulum = glob.glob('**/q6a_sac_InvertedPendulum_InvertedPendulum-v4_17-10-2022_00-11-48/*')[0]
+q6_pendulum = glob.glob('**/q6a_sac_InvertedPendulum_InvertedPendulum-v4_19-10-2022_16-43-25/*')[0]
 q6_cheetah = glob.glob('**/q6b_sac_HalfCheetah_HalfCheetah-v4_19-10-2022_04-49-45/*')[0]
 
 
