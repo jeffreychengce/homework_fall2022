@@ -88,15 +88,12 @@ steps = np.array(steps)-1
 steps = steps[1:]
 itr = np.arange(len(q1_returns))*1000
 
-q2_dqn_returns = (q2_dqn1_returns+q2_dqn2_returns+q2_dqn3_returns)/3
+q2_dqn_returns = (np.array(q2_dqn1_returns)+np.array(q2_dqn2_returns)+np.array(q2_dqn3_returns))/3
+q2_ddqn_returns = (np.array(q2_ddqn1_returns)+np.array(q2_ddqn2_returns)+np.array(q2_ddqn3_returns))/3
 
 fig1 = plt.figure()
-plt.plot(steps, q2_dqn1_returns, label='DQN Seed 1')
-plt.plot(steps, q2_dqn2_returns, label='DQN Seed 2')
-plt.plot(steps, q2_dqn3_returns, label='DQN Seed 3')
-plt.plot(steps, q2_ddqn1_returns, label='DDQN Seed 1')
-plt.plot(steps, q2_ddqn2_returns, label='DDQN Seed 2')
-plt.plot(steps, q2_ddqn3_returns, label='DDQN Seed 3')
+plt.plot(steps, q2_dqn_returns, label='DQN Average Return')
+plt.plot(steps, q2_ddqn_returns, label='DDQN Average Return')
 plt.xlabel('Iteration')
 plt.legend(loc='lower right')
 plt.ylabel('Average Training Return')
@@ -199,7 +196,7 @@ plt.show()
 #%% q6
 
 q6_pendulum = glob.glob('**/q6a_sac_InvertedPendulum_InvertedPendulum-v4_17-10-2022_00-11-48/*')[0]
-q6_cheetah = glob.glob('**/q6b_sac_HalfCheetah_HalfCheetah-v4_17-10-2022_01-38-58/*')[0]
+q6_cheetah = glob.glob('**/q6b_sac_HalfCheetah_HalfCheetah-v4_19-10-2022_04-49-45/*')[0]
 
 
 steps_pen,_,q6_pendulum_returns = get_section_results(q6_pendulum)

@@ -39,6 +39,7 @@ class RL_Trainer(object):
         self.params = params
         self.logger = Logger(self.params['logdir'])
         self.return_history = []
+        self.return_history_train = []
 
         # Set random seeds
         seed = self.params['seed']
@@ -257,6 +258,7 @@ class RL_Trainer(object):
 
 
                 action = self.agent.actor.get_action(obs)[0]
+                # print(action.shape)
                 next_obs, rew, done, _ = self.env.step(action)
 
                 episode_return += rew
@@ -507,6 +509,10 @@ class RL_Trainer(object):
             if itr == 0:
                 self.initial_return = np.mean(stats['reward'])
             logs["Initial_DataCollection_AverageReturn"] = self.initial_return
+            self.return_history.append(np.mean(eval_returns))
+            logs['Eval_History_MaxReturn'] = max(self.return_history)
+            self.return_history_train.append(np.mean(stats['reward']))
+            logs['Train_History_MaxReturn'] = max(self.return_history_train)
 
             # perform the logging
             for key, value in logs.items():
@@ -516,5 +522,6 @@ class RL_Trainer(object):
                 except:
                     pdb.set_trace()
             print('Done logging...\n\n')
+            print(self.params['exp_name'])
 
             self.logger.flush()

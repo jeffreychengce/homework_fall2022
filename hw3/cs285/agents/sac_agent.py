@@ -63,13 +63,14 @@ class SACAgent(BaseAgent):
         terminal_n = ptu.from_numpy(terminal_n)
         terminal_n = terminal_n.unsqueeze(1)
 
-        # calculate target value
         alpha = self.actor.alpha
 
-        # sample next actions
+        # sample next actions and calculate logprobs
         next_action = self.actor.get_action(next_ob_no)
         next_action_distribution = self.actor(ptu.from_numpy(next_ob_no))
-        next_action_logprob = next_action_distribution.log_prob(ptu.from_numpy(next_action))
+        next_action_logprob = next_action_distribution.log_prob(ptu.from_numpy(next_action)).sum(dim=1).unsqueeze(1)
+        
+        # calculate target q values and values
         q_tp1_1, q_tp1_2 = self.critic_target(ptu.from_numpy(next_ob_no), ptu.from_numpy(next_action))
         q_tp1 = torch.min(q_tp1_1, q_tp1_2)
         v_tp1 = q_tp1 - alpha*next_action_logprob
@@ -80,8 +81,14 @@ class SACAgent(BaseAgent):
 
         # calculate q value
         q_t_1, q_t_2 = self.critic(ptu.from_numpy(ob_no), ptu.from_numpy(ac_na))
-        q_t = (q_t_1+q_t_2)/2
-        #q_t = q_t.squeeze(1)
+        q_t = torch.min(q_t_1,q_t_2)
+
+        assert terminal_n.shape == target.shape
+        assert q_tp1.shape == q_t.shape
+        assert next_action_logprob.shape == target.shape
+        assert q_t.shape == target.shape
+        assert re_n.shape == next_action_logprob.shape
+        assert q_t.shape == v_tp1.shape
 
         # update critic
         critic_loss = 0.5*self.critic.loss(target, q_t)
@@ -111,12 +118,14 @@ class SACAgent(BaseAgent):
         for i in range(self.agent_params['num_critic_updates_per_agent_update']):
             loss['Critic_Loss'] = self.update_critic(ob_no, ac_na, next_ob_no, re_n, terminal_n)
             
-            if (i % self.critic_target_update_frequency) == 0:
-                soft_update_params(self.critic, self.critic_target, self.critic_tau)
+        if (self.training_step % self.critic_target_update_frequency) == 0:
+            soft_update_params(self.critic, self.critic_target, self.critic_tau)
             
-            if (i % self.actor_update_frequency) == 0:
-                for j in range(self.agent_params['num_actor_updates_per_agent_update']):
-                    loss['Actor_Loss'], loss['Alpha_Loss'], loss['Temperature'] = self.actor.update(ob_no, self.critic)
+        if (self.training_step % self.actor_update_frequency) == 0:
+            for j in range(self.agent_params['num_actor_updates_per_agent_update']):
+                loss['Actor_Loss'], loss['Alpha_Loss'], loss['Temperature'] = self.actor.update(ob_no, self.critic)
+        
+        self.training_step += 1
         #!!!
 
         return loss
@@ -125,4 +134,4 @@ class SACAgent(BaseAgent):
         self.replay_buffer.add_rollouts(paths)
 
     def sample(self, batch_size):
-        return self.replay_buffer.sample_recent_data(batch_size)
+        return self.replay_buffer.sample_random_data(batch_size)

@@ -1,6 +1,7 @@
 from distutils import log
 from cs285.policies.MLP_policy import MLPPolicy
 from cs285.infrastructure.sac_utils import SquashedNormal
+from cs285.infrastructure.sac_utils import TanhTransform
 import torch
 import numpy as np
 from cs285.infrastructure import sac_utils
@@ -80,20 +81,18 @@ class MLPPolicySAC(MLPPolicy):
         else:
             batch_mean = self.mean_net(observation)
             batch_dim = batch_mean.shape[0]
+            #logstd_clipped = TanhTransform.atanh(self.logstd)
             logstd_clipped = torch.clamp(self.logstd, min=self.log_std_bounds[0], max=self.log_std_bounds[1])
             
             std = logstd_clipped.exp()
-            std = std.repeat(batch_dim, 1)
-            
-            #scale_tril = torch.diag(torch.exp(logstd_clipped))
-            #batch_scale_tril = scale_tril.repeat(batch_dim, 1)
+            batch_std = std.repeat(batch_dim, 1)
 
-            #print(std.shape)
-            #print(scale_tril.shape)
             action_distribution = SquashedNormal(
                 batch_mean,
-                std,
+                batch_std,
             )
+            # print(batch_mean.shape)
+            # print(batch_std.shape)
         #!!!
         
         return action_distribution
@@ -103,40 +102,28 @@ class MLPPolicySAC(MLPPolicy):
         # return losses and alpha value
 
         #!!
+        # get actions from observations
         obs = ptu.from_numpy(obs)
         action_distribution = self(obs)
         action = action_distribution.rsample()
-        #actions = action_distribution.rsample((10,))
-        #print(action.shape)
-        #print(actions.shape)
+
+        # get sum of action logprobs
         logprobs = action_distribution.log_prob(action).sum(dim=1).unsqueeze(1)
-        #logprobs = action_distribution.log_prob(actions).mean(dim=0)#.unsqueeze(1).unsqueeze(1)
-        #print(logprobs.shape)
-        #print(obs.shape)
         logprobs_alpha = logprobs.detach().clone()
-        # for i in range(actions.shape[0]):
-        #     q1,q2 = critic(obs, actions[i,:,:])
-        #     if i == 0:
-        #         #q_sum = q1+q2
-        #         q_min = torch.minimum(q1,q2)
-        #     else:
-        #         #q_sum = q_sum+q1+q2
-        #         q_min = torch.minimum(q_min, q1)
-        #         q_min = torch.minimum(q_min, q2)
+
+        # get q values
         q1, q2 = critic(obs, action)
         q = torch.min(q1,q2)
-        #q = q_min
-        #print(q1.shape)
-        #print(q.shape)
 
         assert logprobs.shape == q.shape
+
+        # actor/policy gradient step
         actor_loss = torch.mean(self.alpha*logprobs - q)
         self.optimizer.zero_grad()
         actor_loss.backward()
         self.optimizer.step()
 
-        #alpha_loss_fn = nn.MSELoss()
-        #logprobs = logprobs.detach()
+        # alpha gradient step
         alpha_loss = torch.mean(-self.alpha*logprobs_alpha-self.alpha*self.target_entropy)
         self.log_alpha_optimizer.zero_grad()
         alpha_loss.backward()
