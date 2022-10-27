@@ -2,6 +2,7 @@ from collections import OrderedDict
 
 from cs285.infrastructure.replay_buffer import ReplayBuffer
 from cs285.infrastructure.utils import *
+from cs285.infrastructure.sac_utils import *
 from .base_agent import BaseAgent
 import gym
 from cs285.policies.sac_policy import MLPPolicySAC
@@ -42,12 +43,87 @@ class SACAgent(BaseAgent):
         self.training_step = 0
         self.replay_buffer = ReplayBuffer(max_size=100000)
 
-    def update_critic(self):
-        # TODO: get this from previous HW  
+    def update_critic(self, ob_no, ac_na, next_ob_no, re_n, terminal_n):
+        # TODO: get this from previous HW 
+        #!!!
+        # 1. Compute the target Q value. 
+        # HINT: You need to use the entropy term (alpha)
+        # 2. Get current Q estimates and calculate critic loss
+        # 3. Optimize the critic  
+
+        #!!!
+        # ob_no = ptu.from_numpy(ob_no)
+        # ac_na = ptu.from_numpy(ac_na)
+        # next_ob_no = ptu.from_numpy(next_ob_no)
+        re_n = ptu.from_numpy(re_n)
+        re_n = re_n.unsqueeze(1)
+        terminal_n = ptu.from_numpy(terminal_n)
+        terminal_n = terminal_n.unsqueeze(1)
+
+        alpha = self.actor.alpha
+
+        # sample next actions and calculate logprobs
+        next_action = self.actor.get_action(next_ob_no)
+        next_action_distribution = self.actor(ptu.from_numpy(next_ob_no))
+        next_action_logprob = next_action_distribution.log_prob(ptu.from_numpy(next_action)).sum(dim=1).unsqueeze(1)
+        
+        # calculate target q values and values
+        q_tp1_1, q_tp1_2 = self.critic_target(ptu.from_numpy(next_ob_no), ptu.from_numpy(next_action))
+        q_tp1 = torch.min(q_tp1_1, q_tp1_2)
+        v_tp1 = q_tp1 - alpha*next_action_logprob
+
+        # calculate target
+        target = re_n + self.gamma*(1-terminal_n)*v_tp1
+        target = target.detach()
+
+        # calculate q value
+        q_t_1, q_t_2 = self.critic(ptu.from_numpy(ob_no), ptu.from_numpy(ac_na))
+        q_t = torch.min(q_t_1,q_t_2)
+
+        assert terminal_n.shape == target.shape
+        assert q_tp1.shape == q_t.shape
+        assert next_action_logprob.shape == target.shape
+        assert q_t.shape == target.shape
+        assert re_n.shape == next_action_logprob.shape
+        assert q_t.shape == v_tp1.shape
+
+        # update critic
+        critic_loss = 0.5*self.critic.loss(target, q_t)
+        self.critic.optimizer.zero_grad()
+        critic_loss.backward()
+        self.critic.optimizer.step()
+        #!!!
+        #!!!
         return critic_loss
 
     def train(self, ob_no, ac_na, re_n, next_ob_no, terminal_n):
         # TODO: get this from previous HW
+        # 1. Implement the following pseudocode:
+        # for agent_params['num_critic_updates_per_agent_update'] steps,
+        #     update the critic
+
+        # 2. Softly update the target every critic_target_update_frequency (HINT: look at sac_utils)
+
+        # 3. Implement following pseudocode:
+        # If you need to update actor
+        # for agent_params['num_actor_updates_per_agent_update'] steps,
+        #     update the actor
+
+        # 4. gather losses for logging
+        loss = OrderedDict()
+        #!!!
+        for i in range(self.agent_params['num_critic_updates_per_agent_update']):
+            loss['Critic_Loss'] = self.update_critic(ob_no, ac_na, next_ob_no, re_n, terminal_n)
+            
+        if (self.training_step % self.critic_target_update_frequency) == 0:
+            soft_update_params(self.critic, self.critic_target, self.critic_tau)
+            
+        if (self.training_step % self.actor_update_frequency) == 0:
+            for j in range(self.agent_params['num_actor_updates_per_agent_update']):
+                loss['Actor_Loss'], loss['Alpha_Loss'], loss['Temperature'] = self.actor.update(ob_no, self.critic)
+        
+        self.training_step += 1
+        #!!!
         return loss
 
     def add_to_replay_buffer(self, paths):
