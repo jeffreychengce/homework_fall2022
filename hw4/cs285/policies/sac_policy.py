@@ -1,4 +1,5 @@
 from cs285.policies.MLP_policy import MLPPolicy
+from cs285.infrastructure.sac_utils import SquashedNormal
 import torch
 import numpy as np
 from cs285.infrastructure import sac_utils
