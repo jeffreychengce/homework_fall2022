@@ -52,12 +52,12 @@ class MBAgent(BaseAgent):
             # you might find the num_data_per_env variable defined above useful
             #!!!
             obs, acs, _, next_obs, _ = self.sample(num_data_per_ens)
-            observations = obs # (Q1)
-            actions = acs # (Q1)
-            next_observations = next_obs # (Q1)
+            observations = obs # TODO(Q1)
+            actions = acs # TODO(Q1)
+            next_observations = next_obs # TODO(Q1)
 
             # use datapoints to update one of the dyn_models
-            model =  self.dyn_models[i] # (Q1)
+            model =  self.dyn_models[i] # TODO(Q1)
             #!!!
             log = model.update(observations, actions, next_observations,
                                 self.data_statistics)

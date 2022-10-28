@@ -53,6 +53,12 @@ class MPCPolicy(BasePolicy):
             # TODO(Q1) uniformly sample trajectories and return an array of
             # dimensions (num_sequences, horizon, self.ac_dim) in the range
             # [self.low, self.high]
+
+            #!!!
+            random_sequence = np.random.random(size=[num_sequences, horizon, self.ac_dim])
+            random_action_sequences = (self.high - self.low) * random_sequence + self.low
+            #!!!
+
             return random_action_sequences
         elif self.sample_strategy == 'cem':
             # TODO(Q5): Implement action selection using CEM.
@@ -83,10 +89,16 @@ class MPCPolicy(BasePolicy):
         #
         # Then, return the mean predictions across all ensembles.
         # Hint: the return value should be an array of shape (N,)
+        #!!!
+        pred_rewards = np.array([])
         for model in self.dyn_models: 
-            pass
+            pred_rewards = np.append(pred_rewards, self.calculate_sum_of_rewards(obs, candidate_action_sequences, model))
 
-        return TODO
+        
+        pred_rewards_avg = np.mean(pred_rewards, axis=1)
+        print(pred_rewards_avg.shape)
+        return pred_rewards_avg
+        #!!!
 
     def get_action(self, obs):
         if self.data_statistics is None:
@@ -120,7 +132,7 @@ class MPCPolicy(BasePolicy):
         :return: numpy array with the sum of rewards for each action sequence.
         The array should have shape [N].
         """
-        sum_of_rewards = None  # TODO (Q2)
+        # TODO (Q2)
         # For each candidate action sequence, predict a sequence of
         # states for each dynamics model in your ensemble.
         # Once you have a sequence of predicted states from each model in
@@ -132,4 +144,15 @@ class MPCPolicy(BasePolicy):
         # Hint: Remember that the model can process observations and actions
         #       in batch, which can be much faster than looping through each
         #       action sequence.
+
+        #!!!
+        print("obs:", obs.shape)
+        print("ac_seq:", candidate_action_sequences.shape)
+        print(candidate_action_sequences)
+        print("data:",self.data_statistics['obs_mean'].shape)
+        predicted_obs = model.get_prediction(obs, candidate_action_sequences, self.data_statistics)
+        rewards = self.env.get_reward(predicted_obs, candidate_action_sequences)
+        print("rews:",rewards.shape)
+
+        #!!!
         return sum_of_rewards

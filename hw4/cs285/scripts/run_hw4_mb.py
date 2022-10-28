@@ -4,6 +4,7 @@ import time
 from cs285.infrastructure.rl_trainer import RL_Trainer
 from cs285.agents.mb_agent import MBAgent
 
+os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
 
 class MB_Trainer(object):
 
