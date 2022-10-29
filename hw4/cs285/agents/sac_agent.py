@@ -46,56 +46,82 @@ class SACAgent(BaseAgent):
 
     def update_critic(self, ob_no, ac_na, next_ob_no, re_n, terminal_n):
         # TODO: get this from previous HW 
-        #!!!
-        # 1. Compute the target Q value. 
-        # HINT: You need to use the entropy term (alpha)
-        # 2. Get current Q estimates and calculate critic loss
-        # 3. Optimize the critic  
+        # #!!!
+        # # 1. Compute the target Q value. 
+        # # HINT: You need to use the entropy term (alpha)
+        # # 2. Get current Q estimates and calculate critic loss
+        # # 3. Optimize the critic  
 
-        #!!!
-        # ob_no = ptu.from_numpy(ob_no)
-        # ac_na = ptu.from_numpy(ac_na)
-        # next_ob_no = ptu.from_numpy(next_ob_no)
-        re_n = ptu.from_numpy(re_n)
-        re_n = re_n.unsqueeze(1)
-        terminal_n = ptu.from_numpy(terminal_n)
-        terminal_n = terminal_n.unsqueeze(1)
+        # #!!!
+        # # ob_no = ptu.from_numpy(ob_no)
+        # # ac_na = ptu.from_numpy(ac_na)
+        # # next_ob_no = ptu.from_numpy(next_ob_no)
+        # re_n = ptu.from_numpy(re_n)
+        # re_n = re_n.unsqueeze(1)
+        # terminal_n = ptu.from_numpy(terminal_n)
+        # terminal_n = terminal_n.unsqueeze(1)
 
-        alpha = self.actor.alpha
+        # alpha = self.actor.alpha
 
-        # sample next actions and calculate logprobs
-        next_action = self.actor.get_action(next_ob_no)
-        next_action_distribution = self.actor(ptu.from_numpy(next_ob_no))
-        next_action_logprob = next_action_distribution.log_prob(ptu.from_numpy(next_action)).sum(dim=1).unsqueeze(1)
+        # # sample next actions and calculate logprobs
+        # next_action = self.actor.get_action(next_ob_no)
+        # next_action_distribution = self.actor(ptu.from_numpy(next_ob_no))
+        # next_action_logprob = next_action_distribution.log_prob(ptu.from_numpy(next_action)).sum(dim=1).unsqueeze(1)
         
-        # calculate target q values and values
-        q_tp1_1, q_tp1_2 = self.critic_target(ptu.from_numpy(next_ob_no), ptu.from_numpy(next_action))
-        q_tp1 = torch.min(q_tp1_1, q_tp1_2)
-        v_tp1 = q_tp1 - alpha*next_action_logprob
+        # # calculate target q values and values
+        # q_tp1_1, q_tp1_2 = self.critic_target(ptu.from_numpy(next_ob_no), ptu.from_numpy(next_action))
+        # q_tp1 = torch.min(q_tp1_1, q_tp1_2)
+        # v_tp1 = q_tp1 - alpha*next_action_logprob
 
-        # calculate target
-        target = re_n + self.gamma*(1-terminal_n)*v_tp1
-        target = target.detach()
+        # # calculate target
+        # target = re_n + self.gamma*(1-terminal_n)*v_tp1
+        # target = target.detach()
 
-        # calculate q value
-        q_t_1, q_t_2 = self.critic(ptu.from_numpy(ob_no), ptu.from_numpy(ac_na))
-        q_t = torch.min(q_t_1,q_t_2)
+        # # calculate q value
+        # q_t_1, q_t_2 = self.critic(ptu.from_numpy(ob_no), ptu.from_numpy(ac_na))
+        # q_t = torch.min(q_t_1,q_t_2)
 
-        assert terminal_n.shape == target.shape
-        assert q_tp1.shape == q_t.shape
-        assert next_action_logprob.shape == target.shape
-        assert q_t.shape == target.shape
-        assert re_n.shape == next_action_logprob.shape
-        assert q_t.shape == v_tp1.shape
+        # assert terminal_n.shape == target.shape
+        # assert q_tp1.shape == q_t.shape
+        # assert next_action_logprob.shape == target.shape
+        # assert q_t.shape == target.shape
+        # assert re_n.shape == next_action_logprob.shape
+        # assert q_t.shape == v_tp1.shape
 
-        # update critic
-        critic_loss = 0.5*self.critic.loss(target, q_t)
+        # # update critic
+        # critic_loss = 0.5*self.critic.loss(target, q_t)
+        # self.critic.optimizer.zero_grad()
+        # critic_loss.backward()
+        # self.critic.optimizer.step()
+        # #!!!
+        # return critic_loss
+
+        ob_no = ptu.from_numpy(ob_no)
+        ac_na = ptu.from_numpy(ac_na)
+        next_ob_no = ptu.from_numpy(next_ob_no)
+        reward_n = ptu.from_numpy(re_n).unsqueeze(1)
+        terminal_n = ptu.from_numpy(terminal_n).unsqueeze(1)
+
+        with torch.no_grad():
+            dist = self.actor(next_ob_no)
+            next_action = dist.rsample()
+            next_Qs = self.critic_target(next_ob_no, next_action)
+            next_Q = torch.min(*next_Qs)
+            target_Q = reward_n + ((1-terminal_n) * self.gamma * next_Q)
+            next_log_prob = dist.log_prob(next_action).sum(-1, keepdim=True)
+            target_Q -= self.gamma * (1-terminal_n) * self.actor.alpha.detach() * next_log_prob
+
+        critic_loss = 0
+        # get current Q estimates
+        current_Qs = self.critic(ob_no, ac_na)
+        for current_Q in current_Qs:
+            critic_loss += self.critic.loss(current_Q, target_Q)
+
+        # Optimize the critic
         self.critic.optimizer.zero_grad()
         critic_loss.backward()
         self.critic.optimizer.step()
-        #!!!
-        #!!!
-        return critic_loss
+        return critic_loss.item()
 
     def train(self, ob_no, ac_na, re_n, next_ob_no, terminal_n):
         # TODO: get this from previous HW
@@ -112,19 +138,33 @@ class SACAgent(BaseAgent):
 
         # 4. gather losses for logging
         loss = OrderedDict()
-        #!!!
-        for i in range(self.agent_params['num_critic_updates_per_agent_update']):
-            loss['Critic_Loss'] = self.update_critic(ob_no, ac_na, next_ob_no, re_n, terminal_n)
+        # #!!!
+        # for i in range(self.agent_params['num_critic_updates_per_agent_update']):
+        #     loss['Critic_Loss'] = self.update_critic(ob_no, ac_na, next_ob_no, re_n, terminal_n)
             
-        if (self.training_step % self.critic_target_update_frequency) == 0:
-            soft_update_params(self.critic, self.critic_target, self.critic_tau)
+        # if (self.training_step % self.critic_target_update_frequency) == 0:
+        #     soft_update_params(self.critic, self.critic_target, self.critic_tau)
             
-        if (self.training_step % self.actor_update_frequency) == 0:
-            for j in range(self.agent_params['num_actor_updates_per_agent_update']):
-                loss['Actor_Loss'], loss['Alpha_Loss'], loss['Temperature'] = self.actor.update(ob_no, self.critic)
+        # if (self.training_step % self.actor_update_frequency) == 0:
+        #     for j in range(self.agent_params['num_actor_updates_per_agent_update']):
+        #         loss['Actor_Loss'], loss['Alpha_Loss'], loss['Temperature'] = self.actor.update(ob_no, self.critic)
         
+        # self.training_step += 1
+        # #!!!
+        for _ in range(self.agent_params['num_critic_updates_per_agent_update']):
+            critic_loss = self.update_critic(ob_no, ac_na, next_ob_no, re_n, terminal_n)
+            loss['Critic_Loss'] = critic_loss
+            if self.training_step % self.critic_target_update_frequency == 0:
+                sac_utils.soft_update_params(self.critic, self.critic_target, self.critic_tau)
+
+        if self.training_step % self.actor_update_frequency == 0:
+            for _ in range(self.agent_params['num_actor_updates_per_agent_update']):
+                actor_loss, alpha_loss, temperature = self.actor.update(ob_no, self.critic)
+                loss['Actor_Loss'] = actor_loss
+                loss['Alpha_Loss'] = alpha_loss
+                loss['Temperature'] = temperature
+
         self.training_step += 1
-        #!!!
         return loss
 
     def add_to_replay_buffer(self, paths):

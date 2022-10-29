@@ -46,17 +46,30 @@ class MLPPolicySAC(MLPPolicy):
         # TODO: get this from previous HW
         # if not sampling return the mean of the distribution
         
-        #!!!
+        # #!!!
 
-        # return the action that the policy prescribes
-        observation = ptu.from_numpy(obs.astype(np.float32))
-        action_distribution = self(observation)
-        if sample:
-            action = ptu.to_numpy(action_distribution.rsample())
+        # # return the action that the policy prescribes
+        # observation = ptu.from_numpy(obs.astype(np.float32))
+        # action_distribution = self(observation)
+        # if sample:
+        #     action = ptu.to_numpy(action_distribution.rsample())
+        # else:
+        #     action = ptu.to_numpy(action_distribution.mean)
+        # #!!!
+        # return action
+
+        if len(obs.shape) > 1:
+            observation = obs
         else:
-            action = ptu.to_numpy(action_distribution.mean)
-        #!!!
-        return action
+            observation = obs[None]
+
+        observation = ptu.from_numpy(observation)
+        dist = self(observation)
+        action = dist.sample() if sample else dist.mean
+        action = action.clamp(*self.action_range)
+        return ptu.to_numpy(action)
+
+
 
     # This function defines the forward pass of the network.
     # You can return anything you want, but you should be able to differentiate
@@ -71,61 +84,88 @@ class MLPPolicySAC(MLPPolicy):
         # You will need to clip log values
         # You will need SquashedNormal from sac_utils file 
 
-        #!!!
-        if self.discrete:
-            logits = self.logits_na(observation)
-            action_distribution = distributions.Categorical(logits=logits)
-            print("discrete???")
-            raise NotImplementedError
-        else:
-            batch_mean = self.mean_net(observation)
-            batch_dim = batch_mean.shape[0]
-            #logstd_clipped = TanhTransform.atanh(self.logstd)
-            logstd_clipped = torch.clamp(self.logstd, min=self.log_std_bounds[0], max=self.log_std_bounds[1])
+        # #!!!
+        # if self.discrete:
+        #     logits = self.logits_na(observation)
+        #     action_distribution = distributions.Categorical(logits=logits)
+        #     print("discrete???")
+        #     raise NotImplementedError
+        # else:
+        #     batch_mean = self.mean_net(observation)
+        #     batch_dim = batch_mean.shape[0]
+        #     #logstd_clipped = TanhTransform.atanh(self.logstd)
+        #     logstd_clipped = torch.clamp(self.logstd, min=self.log_std_bounds[0], max=self.log_std_bounds[1])
             
-            std = logstd_clipped.exp()
-            batch_std = std.repeat(batch_dim, 1)
+        #     std = logstd_clipped.exp()
+        #     batch_std = std.repeat(batch_dim, 1)
 
-            action_distribution = SquashedNormal(
-                batch_mean,
-                batch_std,
-            )
-            # print(batch_mean.shape)
-            # print(batch_std.shape)
-        #!!!
-        return action_distribution
+        #     action_distribution = SquashedNormal(
+        #         batch_mean,
+        #         batch_std,
+        #     )
+        #     # print(batch_mean.shape)
+        #     # print(batch_std.shape)
+        # #!!!
+        # return action_distribution
+        mean = self.mean_net(observation)
+        log_std = torch.tanh(self.logstd)
+        log_std_min, log_std_max = self.log_std_bounds
+        log_std = torch.clip(log_std, log_std_min, log_std_max)
+        std = log_std.exp()
+        dist = sac_utils.SquashedNormal(mean, std)
+        return dist        
 
     def update(self, obs, critic):
         # TODO: get this from previous HW
         # TODO Update actor network and entropy regularizer
         # return losses and alpha value
 
-        #!!!
-        # get actions from observations
+        # #!!!
+        # # get actions from observations
+        # obs = ptu.from_numpy(obs)
+        # action_distribution = self(obs)
+        # action = action_distribution.rsample()
+
+        # # get sum of action logprobs
+        # logprobs = action_distribution.log_prob(action).sum(dim=1).unsqueeze(1)
+        # logprobs_alpha = logprobs.detach().clone()
+
+        # # get q values
+        # q1, q2 = critic(obs, action)
+        # q = torch.min(q1,q2)
+
+        # assert logprobs.shape == q.shape
+
+        # # actor/policy gradient step
+        # actor_loss = torch.mean(self.alpha*logprobs - q)
+        # self.optimizer.zero_grad()
+        # actor_loss.backward()
+        # self.optimizer.step()
+
+        # # alpha gradient step
+        # alpha_loss = torch.mean(-self.alpha*logprobs_alpha-self.alpha*self.target_entropy)
+        # self.log_alpha_optimizer.zero_grad()
+        # alpha_loss.backward()
+        # self.log_alpha_optimizer.step()
+        # #!!!
+        # return actor_loss, alpha_loss, self.alpha
         obs = ptu.from_numpy(obs)
-        action_distribution = self(obs)
-        action = action_distribution.rsample()
 
-        # get sum of action logprobs
-        logprobs = action_distribution.log_prob(action).sum(dim=1).unsqueeze(1)
-        logprobs_alpha = logprobs.detach().clone()
+        dist = self(obs)
+        action = dist.rsample()
+        log_prob = dist.log_prob(action).sum(-1, keepdim=True)
+        actor_Qs = critic(obs, action)
+        actor_Q = torch.min(*actor_Qs)
+        actor_loss = (self.alpha.detach() * log_prob - actor_Q).mean()
 
-        # get q values
-        q1, q2 = critic(obs, action)
-        q = torch.min(q1,q2)
-
-        assert logprobs.shape == q.shape
-
-        # actor/policy gradient step
-        actor_loss = torch.mean(self.alpha*logprobs - q)
         self.optimizer.zero_grad()
         actor_loss.backward()
         self.optimizer.step()
 
-        # alpha gradient step
-        alpha_loss = torch.mean(-self.alpha*logprobs_alpha-self.alpha*self.target_entropy)
         self.log_alpha_optimizer.zero_grad()
+        alpha_loss = (self.alpha *
+                      (-log_prob - self.target_entropy).detach()).mean()
         alpha_loss.backward()
         self.log_alpha_optimizer.step()
-        #!!!
-        return actor_loss, alpha_loss, self.alpha
+
+        return actor_loss.item(), alpha_loss.item(), self.alpha.item()
