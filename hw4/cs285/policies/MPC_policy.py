@@ -74,10 +74,34 @@ class MPCPolicy(BasePolicy):
                 #     (Hint: what existing function can we use to compute rewards for
                 #      our candidate sequences in order to rank them?)
                 # - Update the elite mean and variance
-                pass
+                #!!!
+                if i == 0:
+                    # uniformly generate random actions
+                    sequences = np.random.random(size=[num_sequences, horizon, self.ac_dim])
+                    action_sequences = (self.high - self.low) * sequences + self.low
+                    # initialize elite means and stds
+                    elite_mean = np.mean(action_sequences, axis=0)
+                    elite_std = np.std(action_sequences, axis=0)
+                else: 
+                    # sample candidate sequences
+                    action_sequences = np.random.normal(elite_mean, elite_std, size=(num_sequences, horizon, self.ac_dim))
+                    # calculate sequence rewards
+                    sequence_rewards = self.evaluate_candidate_sequences(action_sequences, obs)
+                    # get elite sequences
+                    elite_sequences_indices = np.argsort(sequence_rewards[-self.cem_num_elites:])
+                    elite_sequences = action_sequences[elite_sequences_indices]
+                    # update elite means and stds
+                    elite_mean = self.cem_alpha*np.mean(elite_sequences, axis=0) + (1-self.cem_alpha)*elite_mean
+                    elite_std = self.cem_alpha*np.std(elite_sequences, axis=0) + (1-self.cem_alpha)*elite_std
+
+                #!!!
 
             # TODO(Q5): Set `cem_action` to the appropriate action chosen by CEM
-            cem_action = None
+            #!!!
+            # sample single action ?
+            cem_action = np.random.normal(elite_mean, elite_std, size=(1, horizon, self.ac_dim))[0,0,:]
+            # cem_action = elite_mean
+            #!!!
 
             return cem_action[None]
         else:
