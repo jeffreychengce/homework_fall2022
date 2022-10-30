@@ -155,7 +155,7 @@ class SACAgent(BaseAgent):
             critic_loss = self.update_critic(ob_no, ac_na, next_ob_no, re_n, terminal_n)
             loss['Critic_Loss'] = critic_loss
             if self.training_step % self.critic_target_update_frequency == 0:
-                sac_utils.soft_update_params(self.critic, self.critic_target, self.critic_tau)
+                soft_update_params(self.critic, self.critic_target, self.critic_tau)
 
         if self.training_step % self.actor_update_frequency == 0:
             for _ in range(self.agent_params['num_actor_updates_per_agent_update']):

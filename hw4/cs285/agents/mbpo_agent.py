@@ -4,6 +4,8 @@ from .mb_agent import MBAgent
 from cs285.infrastructure.replay_buffer import ReplayBuffer
 from cs285.infrastructure.utils import *
 
+from cs285.infrastructure import pytorch_util as ptu
+
 class MBPOAgent(BaseAgent):
     def __init__(self, env, agent_params):
         super(MBPOAgent, self).__init__()
@@ -24,20 +26,37 @@ class MBPOAgent(BaseAgent):
         # dynamics model. Start from a state sampled from the replay buffer.
 
         # sample 1 transition from self.mb_agent.replay_buffer
-        ob, _, _, _, terminal = TODO
+        #!!!
+        ob, _, _, _, terminal = self.sample(1)        
+        #!!!
 
         obs, acs, rewards, next_obs, terminals, image_obs = [], [], [], [], [], []
         for _ in range(rollout_length):
             # get the action from the policy
-            ac = TODO
-            
+            #!!!
+            ob = ptu.from_numpy(ob)
+            dist = self.actor(ob)
+            ac = dist.rsample()
+            ob = ptu.to_numpy(ob)
+            ac = ptu.to_numpy(ac)
+            #!!!
+
             # determine the next observation by averaging the prediction of all the 
             # dynamics models in the ensemble
-            next_ob = TODO
+            #!!!
+            model_obs = []
+            for i in range(self.mb_agent.ensemble_size):
+                model = self.mb_agent.dyn_models[i]
+                model_obs.append(model.get_prediction(ob, ac, self.mb_agent.data_statistics))
+            next_ob = np.mean(model_obs, axis=0)
+            #!!!
 
             # query the reward function to determine the reward of this transition
             # HINT: use self.env.get_reward
-            rew, _ = TODO
+            #!!!
+            rew, _ = self.env.get_reward(next_ob, ac)
+
+            #!!!
 
             obs.append(ob[0])
             acs.append(ac[0])

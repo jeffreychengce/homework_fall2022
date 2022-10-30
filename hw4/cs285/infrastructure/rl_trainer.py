@@ -37,6 +37,8 @@ class RL_Trainer(object):
         # Get params, create logger
         self.params = params
         self.logger = Logger(self.params['logdir'])
+        self.return_history = []
+        self.return_history_train = []
 
         # Set random seeds
         seed = self.params['seed']
@@ -165,7 +167,10 @@ class RL_Trainer(object):
                         # learned dynamics model. Add this trajectory to the correct replay buffer.
                         # HINT: Look at collect_model_trajectory and add_to_replay_buffer from MBPOAgent.
                         # HINT: Use the from_model argument to ensure the paths are added to the correct buffer.
-                        pass
+                        #!!!
+                        mbpo_path = self.agent.collect_model_trajectory(rollout_length=self.params['mbpo_rollout_length'])
+                        self.agent.add_to_replay_buffer(mbpo_path, from_model=True)
+                        #!!!
                     # train the SAC agent
                     self.train_sac_agent()
 
@@ -234,10 +239,7 @@ class RL_Trainer(object):
                 ob_batch, ac_batch, re_batch, next_ob_batch, terminal_batch
             )
             all_logs.append(train_log)
-            # print("Critic Loss:", train_log['Critic_Loss'])
-            # print("Actor Loss:", train_log['Actor_Loss'])
-            # print("Alpha Loss:", train_log['Alpha_Loss'])
-            # print("")
+
         return all_logs
         #!!!    
 
@@ -247,28 +249,26 @@ class RL_Trainer(object):
         # 1) sample a batch of data of size self.sac_params['train_batch_size'] with self.agent.sample_sac
         # 2) train the SAC agent self.agent.train_sac
         # HINT: This will look similar to train_agent above.
+
         #!!!
         # print('\nTraining agent using sampled data from replay buffer...')
         all_logs = []
-        for train_step in range(self.params['num_agent_train_steps_per_iter']):
-            
+        for train_step in range(self.sac_params['num_agent_train_steps_per_iter']):
+            #print(train_step)
             # sample some data from the data buffer
             # HINT1: use the agent's sample function
             # HINT2: how much data = self.params['train_batch_size']
             ob_batch, ac_batch, re_batch, next_ob_batch, terminal_batch = \
-                self.agent.sample(self.params['train_batch_size'])
+                self.agent.sample_sac(self.sac_params['train_batch_size'])
 
             # use the sampled data to train an agent
             # HINT: use the agent's train function
             # HINT: keep the agent's training log for debugging
-            train_log = self.agent.train(\
+            train_log = self.agent.train_sac(\
                 ob_batch, ac_batch, re_batch, next_ob_batch, terminal_batch
             )
             all_logs.append(train_log)
-            # print("Critic Loss:", train_log['Critic_Loss'])
-            # print("Actor Loss:", train_log['Actor_Loss'])
-            # print("Alpha Loss:", train_log['Alpha_Loss'])
-            # print("")
+
         return all_logs
         #!!!    
 
@@ -329,6 +329,12 @@ class RL_Trainer(object):
             if itr == 0:
                 self.initial_return = np.mean(train_returns)
             logs["Initial_DataCollection_AverageReturn"] = self.initial_return
+            #!!!
+            self.return_history.append(np.mean(eval_returns))
+            logs['Eval_History_MaxReturn'] = max(self.return_history)
+            self.return_history_train.append(np.mean(train_returns))
+            logs['Train_History_MaxReturn'] = max(self.return_history_train)
+            #!!!
 
             # perform the logging
             for key, value in logs.items():

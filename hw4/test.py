@@ -20,4 +20,13 @@ elites = rewards[elite_indices]
 matrix = np.random.rand(10,4,2)
 
 means = np.mean(matrix, axis=0)
+std = np.std(matrix, axis=0)
 
+actions = np.random.normal(means, std, size = (1,4,2))
+
+action = actions[0,0,:] == actions[0,0,:]
+
+model_obs = []
+for i in range(5):
+    next_ob = np.random.rand(4)
+    model_obs.append(next_ob)

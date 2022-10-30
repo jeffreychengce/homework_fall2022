@@ -55,7 +55,7 @@ class MPCPolicy(BasePolicy):
             # [self.low, self.high]
 
             #!!!
-            random_sequence = np.random.random(size=[num_sequences, horizon, self.ac_dim])
+            random_sequence = np.random.rand(num_sequences, horizon, self.ac_dim)
             random_action_sequences = (self.high - self.low) * random_sequence + self.low
             #!!!
 
@@ -116,19 +116,16 @@ class MPCPolicy(BasePolicy):
 
         #!!!
         # initialize rewards matrix
-        pred_rewards = np.zeros(shape=(self.N, 1))
+        pred_rewards = []
 
         for model in self.dyn_models:
             # get model rewards
             model_rewards = self.calculate_sum_of_rewards(obs, candidate_action_sequences, model)
-            model_rewards = np.expand_dims(model_rewards, axis=1) # unsqueeze
             # append to rewards matrix
-            pred_rewards = np.concatenate((pred_rewards, model_rewards), axis=1)
+            pred_rewards.append(model_rewards)
         
-        # remove zeros column from initialization
-        pred_rewards = pred_rewards[:,1:]
         # calculate mean across models
-        pred_rewards_avg = np.mean(pred_rewards, axis=1)
+        pred_rewards_avg = np.mean(pred_rewards, axis=0)
 
         return pred_rewards_avg
         #!!!
@@ -143,7 +140,8 @@ class MPCPolicy(BasePolicy):
 
         if candidate_action_sequences.shape[0] == 1:
             # CEM: only a single action sequence to consider; return the first action
-            return candidate_action_sequences[0][0][None]
+            return candidate_action_sequences
+
         else:
             predicted_rewards = self.evaluate_candidate_sequences(candidate_action_sequences, obs)
 
@@ -182,7 +180,7 @@ class MPCPolicy(BasePolicy):
 
         #!!!
         # initialize rewards matrix
-        rewards = np.zeros(shape=(self.N,1))
+        rewards = []
         
         # repeat obs N times for batching
         obs_batch = np.repeat(np.expand_dims(obs, axis=0), self.N, axis = 0)
@@ -194,16 +192,11 @@ class MPCPolicy(BasePolicy):
             predicted_obs_batch = model.get_prediction(obs_batch, action_batch, self.data_statistics)
             # get rewards from this predicted observation and action
             step_rewards, _ = self.env.get_reward(predicted_obs_batch, action_batch)
-            step_rewards = np.expand_dims(step_rewards, axis=1) # unsqueeze
             # append to rewards matrix
-            rewards = np.concatenate((rewards, step_rewards), axis=1)
-            # make predicted obsevations current observations
-            obs_batch = predicted_obs_batch
-
-        # remove zeros column from initialization even though it shouldnt matter at all 
-        # (and it doesn't)
-        rewards = rewards[:,1:]
+            rewards.append(step_rewards)
+            # make predicted next obsevations current observations
+            obs_batch = predicted_obs_batch        
         # sum across horizons
-        sum_of_rewards = np.sum(rewards, axis=1)
+        sum_of_rewards = np.sum(rewards, axis=0)
         #!!!
         return sum_of_rewards
