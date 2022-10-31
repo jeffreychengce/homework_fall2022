@@ -27,7 +27,7 @@ class MBPOAgent(BaseAgent):
 
         # sample 1 transition from self.mb_agent.replay_buffer
         #!!!
-        ob, _, _, _, terminal = self.sample(1)        
+        ob, _, _, _, terminal = self.mb_agent.replay_buffer.sample_random_data(1)      
         #!!!
 
         obs, acs, rewards, next_obs, terminals, image_obs = [], [], [], [], [], []

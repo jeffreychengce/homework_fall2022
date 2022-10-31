@@ -199,4 +199,5 @@ class MPCPolicy(BasePolicy):
         # sum across horizons
         sum_of_rewards = np.sum(rewards, axis=0)
         #!!!
+
         return sum_of_rewards
