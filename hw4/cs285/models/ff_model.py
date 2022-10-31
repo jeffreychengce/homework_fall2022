@@ -91,8 +91,7 @@ class FFModel(nn.Module, BaseModel):
         # *normalized change* in state, i.e. normalized(s_t+1 - s_t).
         delta_pred_normalized = self.delta_network(concatenated_input) # TODO(Q1)
         delta_pred_unnormalized = unnormalize(delta_pred_normalized, delta_mean, delta_std)
-        # calculate next obs from delta
-        next_obs_pred = obs_unnormalized + delta_pred_unnormalized# TODO(Q1)
+        next_obs_pred = obs_unnormalized + delta_pred_unnormalized # TODO(Q1)
         #!!!
         return next_obs_pred, delta_pred_normalized
 
@@ -123,6 +122,7 @@ class FFModel(nn.Module, BaseModel):
         delta_mean = ptu.from_numpy(data_statistics['delta_mean'])
         delta_std = ptu.from_numpy(data_statistics['delta_std'])
 
+
         prediction, _ = self(
             obs, 
             acs, 
@@ -131,8 +131,8 @@ class FFModel(nn.Module, BaseModel):
             acs_mean,
             acs_std,
             delta_mean,
-            delta_std
-        )
+            delta_std,
+            )
         prediction = ptu.to_numpy(prediction)
         #!!!
         return prediction
@@ -157,7 +157,6 @@ class FFModel(nn.Module, BaseModel):
         # Hint: you should use `data_statistics['delta_mean']` and
         # `data_statistics['delta_std']`, which keep track of the mean
         # and standard deviation of the model.
-        next_observations = ptu.from_numpy(next_observations)
         observations = ptu.from_numpy(observations)
         actions = ptu.from_numpy(actions)
         obs_mean = ptu.from_numpy(data_statistics['obs_mean'])
@@ -166,8 +165,9 @@ class FFModel(nn.Module, BaseModel):
         acs_std = ptu.from_numpy(data_statistics['acs_std'])
         delta_mean = ptu.from_numpy(data_statistics['delta_mean'])
         delta_std = ptu.from_numpy(data_statistics['delta_std'])
+        next_observations = ptu.from_numpy(next_observations)
 
-        prediction, _ = self(
+        _, predicted_delta = self(
             observations, 
             actions, 
             obs_mean,
@@ -175,13 +175,14 @@ class FFModel(nn.Module, BaseModel):
             acs_mean,
             acs_std,
             delta_mean,
-            delta_std
-        )
+            delta_std,
+            )
 
+        # target_delta = ptu.from_numpy(next_observations - observations)
         target_delta = next_observations - observations
         target = normalize(target_delta, delta_mean, delta_std)
-
-        loss = self.loss(target, prediction) # TODO(Q1) compute the loss
+        
+        loss = self.loss(target, predicted_delta) # TODO(Q1) compute the loss
         # Hint: `self(...)` returns a tuple, but you only need to use one of the
         # outputs.
         #!!!
