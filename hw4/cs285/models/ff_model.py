@@ -90,8 +90,9 @@ class FFModel(nn.Module, BaseModel):
         # Hint: as described in the PDF, the output of the network is the
         # *normalized change* in state, i.e. normalized(s_t+1 - s_t).
         delta_pred_normalized = self.delta_network(concatenated_input) # TODO(Q1)
-
-        next_obs_pred = obs_unnormalized + unnormalize(delta_pred_normalized, delta_mean, delta_std) # TODO(Q1)
+        delta_pred_unnormalized = unnormalize(delta_pred_normalized, delta_mean, delta_std)
+        # calculate next obs from delta
+        next_obs_pred = obs_unnormalized + delta_pred_unnormalized# TODO(Q1)
         #!!!
         return next_obs_pred, delta_pred_normalized
 
@@ -177,15 +178,9 @@ class FFModel(nn.Module, BaseModel):
             delta_std
         )
 
-        # target_delta = ptu.from_numpy(next_observations - observations)
         target_delta = next_observations - observations
-        # target_delta_mean = torch.mean(target_delta)
-        # target_delta_std = torch.std(target_delta)
-        # data_statistics['delta_mean'] = target_delta_mean
-        # data_statistics['delta_std'] = target_delta_std
-        
         target = normalize(target_delta, delta_mean, delta_std)
-        # target = ptu.from_numpy(target)
+
         loss = self.loss(target, prediction) # TODO(Q1) compute the loss
         # Hint: `self(...)` returns a tuple, but you only need to use one of the
         # outputs.
