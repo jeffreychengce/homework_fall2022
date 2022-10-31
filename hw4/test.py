@@ -14,10 +14,11 @@ rewards = np.random.random(n)*10
 # indices = np.expand_dims(indices, axis=1)
 # rewards = np.expand_dims(rewards, axis=1
 
-elite_indices = np.argsort(rewards, axis=0)[-4:]
+elite_indices = np.argsort(rewards)[-4:]
 elites = rewards[elite_indices]
 
 matrix = np.random.rand(10,4,2)
+elites2 = matrix[elite_indices]
 
 means = np.mean(matrix, axis=0)
 std = np.std(matrix, axis=0)
@@ -30,3 +31,7 @@ model_obs = []
 for i in range(5):
     next_ob = np.random.rand(4)
     model_obs.append(next_ob)
+
+next_ob = np.mean(model_obs,axis=0)
+
+variance = np.random.rand(4,2)

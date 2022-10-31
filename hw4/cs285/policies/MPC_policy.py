@@ -79,28 +79,26 @@ class MPCPolicy(BasePolicy):
                     # uniformly generate random actions
                     sequences = np.random.random(size=[num_sequences, horizon, self.ac_dim])
                     action_sequences = (self.high - self.low) * sequences + self.low
-                    # initialize elite means and stds
+                    # initialize elite means and vars
                     elite_mean = np.mean(action_sequences, axis=0)
-                    elite_std = np.std(action_sequences, axis=0)
+                    elite_var = np.var(action_sequences, axis=0)
                 else: 
                     # sample candidate sequences
-                    action_sequences = np.random.normal(elite_mean, elite_std, size=(num_sequences, horizon, self.ac_dim))
+                    action_sequences = np.random.normal(elite_mean, np.sqrt(elite_var), size=(num_sequences, horizon, self.ac_dim))
                     # calculate sequence rewards
                     sequence_rewards = self.evaluate_candidate_sequences(action_sequences, obs)
                     # get elite sequences
-                    elite_sequences_indices = np.argsort(sequence_rewards[-self.cem_num_elites:])
-                    elite_sequences = action_sequences[elite_sequences_indices]
-                    # update elite means and stds
+                    elite_sequences_indices = np.argsort(sequence_rewards)[-self.cem_num_elites:]
+                    elite_sequences = action_sequences[elite_sequences_indices,:,:]
+                    # update elite means and vars
                     elite_mean = self.cem_alpha*np.mean(elite_sequences, axis=0) + (1-self.cem_alpha)*elite_mean
-                    elite_std = self.cem_alpha*np.std(elite_sequences, axis=0) + (1-self.cem_alpha)*elite_std
-
+                    elite_var = self.cem_alpha*np.var(elite_sequences, axis=0) + (1-self.cem_alpha)*elite_var
                 #!!!
 
             # TODO(Q5): Set `cem_action` to the appropriate action chosen by CEM
             #!!!
-            # sample single action ?
-            cem_action = np.random.normal(elite_mean, elite_std, size=(1, horizon, self.ac_dim))[0,0,:]
-            # cem_action = elite_mean
+            # set cem_action to first action of the mean
+            cem_action = elite_mean[0,:]
             #!!!
 
             return cem_action[None]
