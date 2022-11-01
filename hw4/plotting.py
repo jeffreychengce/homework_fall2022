@@ -47,184 +47,183 @@ def get_section_results_mean(file):
 
 
 #%% q1
-q1 = glob.glob('**/q1_MsPacman-v0_13-10-2022_22-59-43/*')[0]
 
-steps, q1_returns, q1_means = get_section_results_mean(q1)
-
-steps = steps[2:]
-q1_returns = q1_returns[1:]
-
-itr = np.arange(len(q1_returns))*1000
-
-fig1 = plt.figure()
-plt.plot(steps, q1_returns, label="Mean Epoch Reward")
-plt.plot(steps, q1_means, label="Best Mean Reward")
-plt.legend(loc = "lower right")
-plt.xlabel('Iteration')
-plt.ylabel('Return')
-plt.title('MsPacman DQN Learning Curve')
-fig1.set_size_inches(10, 6)
-plt.show()
 
 #%% q2
 
-q2_dqn1 = glob.glob('**/q2_dqn_1_LunarLander-v3_13-10-2022_23-12-10/*')[0]
-q2_dqn2 = glob.glob('**/q2_dqn_2_LunarLander-v3_13-10-2022_23-12-10/*')[0]
-q2_dqn3 = glob.glob('**/q2_dqn_3_LunarLander-v3_13-10-2022_23-12-10/*')[0]
+q2 = glob.glob('**/hw4_q2_obstacles_singleiteration_obstacles-cs285-v0_30-10-2022_19-53-25/*')[0]
 
-q2_ddqn1 = glob.glob('**/q2_doubledqn_1_LunarLander-v3_14-10-2022_03-06-29/*')[0]
-q2_ddqn2 = glob.glob('**/q2_doubledqn_2_LunarLander-v3_14-10-2022_03-06-29/*')[0]
-q2_ddqn3 = glob.glob('**/q2_doubledqn_3_LunarLander-v3_14-10-2022_03-06-29/*')[0]
 
-steps,q2_dqn1_returns,_ = get_section_results(q2_dqn1)
-_,q2_dqn2_returns,_ = get_section_results(q2_dqn2)
-_,q2_dqn3_returns,_ = get_section_results(q2_dqn3)
 
-_,q2_ddqn1_returns,_ = get_section_results(q2_ddqn1)
-_,q2_ddqn2_returns,_ = get_section_results(q2_ddqn2)
-_,q2_ddqn3_returns,_ = get_section_results(q2_ddqn3)
 
-steps = np.array(steps)-1
-steps = steps[1:]
-itr = np.arange(len(q1_returns))*1000
+steps,q2_train,q2_eval = get_section_results(q2)
 
-q2_dqn_returns = (np.array(q2_dqn1_returns)+np.array(q2_dqn2_returns)+np.array(q2_dqn3_returns))/3
-q2_ddqn_returns = (np.array(q2_ddqn1_returns)+np.array(q2_ddqn2_returns)+np.array(q2_ddqn3_returns))/3
+
+itr = np.arange(len(q2_eval))
 
 fig1 = plt.figure()
-plt.plot(steps, q2_dqn_returns, label='DQN Average Return')
-plt.plot(steps, q2_ddqn_returns, label='DDQN Average Return')
+plt.scatter(itr, q2_train, label='Training Return')
+plt.scatter(itr, q2_eval, label='Evaluation Return')
 plt.xlabel('Iteration')
 plt.legend(loc='lower right')
-plt.ylabel('Average Training Return')
-plt.title('LunarLander DQN and DDQN Learning Curves')
+plt.ylabel('Average Return')
+plt.title('MPC in Obstacles Environment')
 fig1.set_size_inches(10, 6)
 plt.show()
 
 #%% q3
 
-q3_hparam1 = glob.glob('**/q3_hparam1_LunarLander-v3_17-10-2022_01-45-58/*')[0]
-q3_hparam2 = glob.glob('**/q3_hparam2_LunarLander-v3_17-10-2022_01-45-57/*')[0]
-q3_hparam3 = glob.glob('**/q3_hparam3_LunarLander-v3_17-10-2022_01-45-58/*')[0]
+q3_obstacles = glob.glob('**/hw4_q3_obstacles_obstacles-cs285-v0_30-10-2022_19-53-44/*')[0]
+q3_reacher = glob.glob('**/hw4_q3_reacher_reacher-cs285-v0_30-10-2022_20-06-57/*')[0]
+q3_cheetah = glob.glob('**/hw4_q3_cheetah_cheetah-cs285-v0_30-10-2022_21-06-51/*')[0]
 
-steps,q3_hparam1_returns,_ = get_section_results(q3_hparam1)
-_,q3_hparam2_returns,_ = get_section_results(q3_hparam2)
-_,q3_hparam3_returns,_ = get_section_results(q3_hparam3)
+steps,q3_obstacles_train,q3_obstacles_eval = get_section_results(q3_obstacles)
+_,q3_reacher_train,q3_reacher_eval = get_section_results(q3_reacher)
+_,q3_cheetah_train,q3_cheetah_eval = get_section_results(q3_cheetah)
 
-steps = np.array(steps)-1
-steps = steps[1:]
-itr = np.arange(len(q1_returns))*1000
+itr_obstacles = np.arange(len(q3_obstacles_eval))
+itr_reacher = np.arange(len(q3_reacher_eval))
+itr_cheetah = np.arange(len(q3_cheetah_eval))
 
 fig1 = plt.figure()
-plt.plot(steps, q2_dqn1_returns, label='Batch Size: 32')
-plt.plot(steps, q3_hparam1_returns, label='Batch Size: 16')
-plt.plot(steps, q3_hparam2_returns, label='Batch Size: 128')
-plt.plot(steps, q3_hparam3_returns, label='Batch Size: 2048')
-
+#plt.plot(itr_obstacles, q3_obstacles_train, label='Training Returns')
+plt.plot(itr_obstacles, q3_obstacles_eval, label='Evaluation Returns')
 plt.xlabel('Iteration')
-plt.legend(loc='lower left')
-plt.ylabel('Average Training Return')
-plt.title('LunarLander DQN Learning Curves with Varying Batch Sizes')
+#plt.legend(loc='lower left')
+plt.ylabel('Average Evaluation Return')
+plt.title('On-Policy MBRL in the Obstacles Environment')
+fig1.set_size_inches(10, 6)
+plt.show()
+
+fig1 = plt.figure()
+#plt.plot(itr_reacher, q3_reacher_train, label='Training Returns')
+plt.plot(itr_reacher, q3_reacher_eval, label='Evaluation Returns')
+plt.xlabel('Iteration')
+#plt.legend(loc='lower left')
+plt.ylabel('Average Evaluation Return')
+plt.title('On-Policy MBRL in the Reacher Environment')
+fig1.set_size_inches(10, 6)
+plt.show()
+
+fig1 = plt.figure()
+#plt.plot(itr_cheetah, q3_cheetah_train, label='Training Returns')
+plt.plot(itr_cheetah, q3_cheetah_eval, label='Evaluation Returns')
+plt.xlabel('Iteration')
+#plt.legend(loc='lower left')
+plt.ylabel('Average Evaluation Return')
+plt.title('On-Policy MBRL in the Cheetah Environment')
 fig1.set_size_inches(10, 6)
 plt.show()
 
 #%% q4
 
-q4_ac_1_1 = glob.glob('**/q4_ac_1_1_CartPole-v0_14-10-2022_23-31-41/*')[0]
-q4_ac_100_1 = glob.glob('**/q4_ac_1_100_CartPole-v0_14-10-2022_23-36-37/*')[0]
-q4_ac_1_100 = glob.glob('**/q4_ac_100_1_CartPole-v0_14-10-2022_23-33-12/*')[0]
-q4_ac_10_10 = glob.glob('**/q4_ac_10_10_CartPole-v0_14-10-2022_23-40-32/*')[0]
+q4_horizon5 = glob.glob('**/hw4_q4_reacher_horizon5_reacher-cs285-v0_31-10-2022_00-48-42/*')[0]
+q4_horizon15 = glob.glob('**/hw4_q4_reacher_horizon15_reacher-cs285-v0_31-10-2022_00-48-42/*')[0]
+q4_horizon30 = glob.glob('**/hw4_q4_reacher_horizon30_reacher-cs285-v0_31-10-2022_00-48-42/*')[0]
 
-steps,_,q4_ac_1_1_returns = get_section_results(q4_ac_1_1)
-_,_,q4_ac_100_1_returns = get_section_results(q4_ac_100_1)
-_,_,q4_ac_1_100_returns = get_section_results(q4_ac_1_100)
-_,_,q4_ac_10_10_returns = get_section_results(q4_ac_10_10)
+q4_numseq100 = glob.glob('**/hw4_q4_reacher_numseq100_reacher-cs285-v0_31-10-2022_12-24-54/*')[0]
+q4_numseq1000 = glob.glob('**/hw4_q4_reacher_numseq1000_reacher-cs285-v0_31-10-2022_12-24-54/*')[0]
 
-steps = np.array(steps)-1
+q4_ensemble1 = glob.glob('**/hw4_q4_reacher_ensemble1_reacher-cs285-v0_31-10-2022_09-11-49/*')[0]
+q4_ensemble3 = glob.glob('**/hw4_q4_reacher_ensemble3_reacher-cs285-v0_31-10-2022_09-11-49/*')[0]
+q4_ensemble5 = glob.glob('**/hw4_q4_reacher_ensemble5_reacher-cs285-v0_31-10-2022_09-11-49/*')[0]
 
-itr = np.arange(len(q1_returns))*1000
+_,_,q4_horizon5_eval = get_section_results(q4_horizon5)
+_,_,q4_horizon15_eval = get_section_results(q4_horizon15)
+_,_,q4_horizon30_eval = get_section_results(q4_horizon30)
+
+_,_,q4_numseq100_eval = get_section_results(q4_numseq100)
+_,_,q4_numseq1000_eval = get_section_results(q4_numseq1000)
+
+_,_,q4_ensemble1_eval = get_section_results(q4_ensemble1)
+_,_,q4_ensemble3_eval = get_section_results(q4_ensemble3)
+_,_,q4_ensemble5_eval = get_section_results(q4_ensemble5)
+
+itr = np.arange(15)
 
 fig1 = plt.figure()
-plt.plot(steps, q4_ac_1_1_returns, label='ntu 1, ngsptu 1')
-plt.plot(steps, q4_ac_1_100_returns, label='ntu 1, ngsptu 100')
-plt.plot(steps, q4_ac_100_1_returns, label='ntu 100, ngsptu 1')
-plt.plot(steps, q4_ac_10_10_returns, label='ntu 10, ngsptu 10')
-
+plt.plot(itr, q4_horizon5_eval, label='Horizon: 5')
+plt.plot(itr, q4_horizon15_eval, label='Horizon: 15')
+plt.plot(itr, q4_horizon30_eval, label='Horizon: 30')
 plt.xlabel('Iteration')
 plt.legend(loc='lower right')
 plt.ylabel('Average Evaluation Return')
-plt.title('CartPole AC Learning Curves with Varying Target Updates and Gradient Steps per Target Update')
+plt.title('On-Policy MBRL in the Reacher Environment, Varying Planning Horizons')
 fig1.set_size_inches(10, 6)
 plt.show()
 
+fig1 = plt.figure()
+plt.plot(itr, q4_numseq100_eval, label='Candidate Sequences: 100')
+plt.plot(itr, q4_numseq1000_eval, label='Candidate Sequences: 1000')
+plt.xlabel('Iteration')
+plt.legend(loc='lower right')
+plt.ylabel('Average Evaluation Return')
+plt.title('On-Policy MBRL in the Reacher Environment, Varying Candidate Action Sequences')
+fig1.set_size_inches(10, 6)
+plt.show()
+
+
+fig1 = plt.figure()
+plt.plot(itr, q4_ensemble1_eval, label='Ensemble Size: 5')
+plt.plot(itr, q4_ensemble3_eval, label='Ensemble Size: 15')
+plt.plot(itr, q4_ensemble5_eval, label='Ensemble Size: 30')
+plt.xlabel('Iteration')
+plt.legend(loc='lower right')
+plt.ylabel('Average Evaluation Return')
+plt.title('On-Policy MBRL in the Reacher Environment, Varying Ensemble Sizes')
+fig1.set_size_inches(10, 6)
+plt.show()
 #%% q5
 
-
-q5_pendulum = glob.glob('**/q5_10_10_InvertedPendulum-v4_15-10-2022_00-21-46/*')[0]
-q5_cheetah = glob.glob('**/q5_10_10_HalfCheetah-v4_15-10-2022_00-21-46/*')[0]
-
-
-steps_pen,_,q5_pendulum_returns = get_section_results(q5_pendulum)
-steps_cheetah,_,q5_cheetah_returns = get_section_results(q5_cheetah)
+q5_random = glob.glob('**/hw4_q5_cheetah_random_cheetah-cs285-v0_31-10-2022_17-07-35/*')[0]
+q5_cem2 = glob.glob('**/hw4_q5_cheetah_cem_2_cheetah-cs285-v0_31-10-2022_17-07-35/*')[0]
+q5_cem4 = glob.glob('**/hw4_q5_cheetah_cem_4_cheetah-cs285-v0_31-10-2022_11-19-10/*')[0]
 
 
-steps_pen = np.array(steps_pen)
-steps_cheetah = np.array(steps_cheetah)
+_,_,q5_random_eval = get_section_results(q5_random)
+_,_,q5_cem2_eval = get_section_results(q5_cem2)
+_,_,q5_cem4_eval = get_section_results(q5_cem4)
 
-itr = np.arange(len(q1_returns))*1000
+
+
+itr = np.arange(5)
 
 fig1 = plt.figure()
-plt.plot(steps_pen, q5_pendulum_returns)
-
-
+plt.plot(itr, q5_random_eval, label='Random Shooting')
+plt.plot(itr, q5_cem2_eval, label='2 CEM Iterations')
+plt.plot(itr, q5_cem4_eval, label='4 CEM Iterations')
 plt.xlabel('Iteration')
+plt.legend(loc='upper left')
 plt.ylabel('Average Evaluation Return')
-plt.title('InvertedPendulum AC Learning Curve')
+plt.title('On-Policy MBRL in the Cheetah Environment, Varying Action Selection')
 fig1.set_size_inches(10, 6)
 plt.show()
 
-fig1 = plt.figure()
-plt.plot(steps_cheetah, q5_cheetah_returns)
 
-
-plt.xlabel('Iteration')
-plt.ylabel('Average Evaluation Return')
-plt.title('HalfCheetah AC Learning Curve')
-fig1.set_size_inches(10, 6)
-plt.show()
 
 #%% q6
 
-q6_pendulum = glob.glob('**/q6a_sac_InvertedPendulum_InvertedPendulum-v4_19-10-2022_16-43-25/*')[0]
-q6_cheetah = glob.glob('**/q6b_sac_HalfCheetah_HalfCheetah-v4_19-10-2022_04-49-45/*')[0]
+q6_SAC = glob.glob('**/hw4_q5_cheetah_random_cheetah-cs285-v0_31-10-2022_17-07-35/*')[0]
+q6_Dyna = glob.glob('**/hw4_q5_cheetah_cem_2_cheetah-cs285-v0_31-10-2022_17-07-35/*')[0]
+q6_MBPO = glob.glob('**/hw4_q5_cheetah_cem_4_cheetah-cs285-v0_31-10-2022_11-19-10/*')[0]
 
 
-steps_pen,_,q6_pendulum_returns = get_section_results(q6_pendulum)
-steps_cheetah,_,q6_cheetah_returns = get_section_results(q6_cheetah)
+_,_,q6_SAC_eval = get_section_results(q6_SAC)
+_,_,q6_Dyna_eval = get_section_results(q6_Dyna)
+_,_,q6_MBPO_eval = get_section_results(q6_MBPO)
 
 
-steps_pen = np.array(steps_pen)
-steps_cheetah = np.array(steps_cheetah)
 
-itr = np.arange(len(q1_returns))*1000
-
-fig1 = plt.figure()
-plt.plot(steps_pen, q6_pendulum_returns)
-
-
-plt.xlabel('Iteration')
-plt.ylabel('Average Evaluation Return')
-plt.title('InvertedPendulum SAC Learning Curve')
-fig1.set_size_inches(10, 6)
-plt.show()
+itr = np.arange(5)
 
 fig1 = plt.figure()
-plt.plot(steps_cheetah, q6_cheetah_returns)
-
-
+plt.plot(itr, q6_SAC_eval, label='Model-Free SAC')
+plt.plot(itr, q6_Dyna_eval, label='Dyna: Single Step Rollouts')
+plt.plot(itr, q6_MBPO_eval, label='MBPO: 10 Step Rollouts')
 plt.xlabel('Iteration')
+plt.legend(loc='upper left')
 plt.ylabel('Average Evaluation Return')
-plt.title('HalfCheetah SAC Learning Curve')
+plt.title('Variations of MBPO in the Cheetah Environment')
 fig1.set_size_inches(10, 6)
 plt.show()
 
