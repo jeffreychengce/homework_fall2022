@@ -35,3 +35,4 @@ for i in range(5):
 next_ob = np.mean(model_obs,axis=0)
 
 variance = np.random.rand(4,2)
+std = np.sqrt(variance)
