@@ -203,9 +203,9 @@ plt.show()
 
 #%% q6
 
-q6_SAC = glob.glob('**/hw4_q5_cheetah_random_cheetah-cs285-v0_31-10-2022_17-07-35/*')[0]
-q6_Dyna = glob.glob('**/hw4_q5_cheetah_cem_2_cheetah-cs285-v0_31-10-2022_17-07-35/*')[0]
-q6_MBPO = glob.glob('**/hw4_q5_cheetah_cem_4_cheetah-cs285-v0_31-10-2022_11-19-10/*')[0]
+q6_SAC = glob.glob('**/hw4_q6_cheetah_rlen1_cheetah-cs285-v0_31-10-2022_17-46-17/*')[0]
+q6_Dyna = glob.glob('**/hw4_q6_cheetah_rlenl0_cheetah-cs285-v0_31-10-2022_17-46-17/*')[0]
+q6_MBPO = glob.glob('**/hw4_q6_cheetah_rlen10_cheetah-cs285-v0_30-10-2022_22-32-40/*')[0]
 
 
 _,_,q6_SAC_eval = get_section_results(q6_SAC)
@@ -214,7 +214,7 @@ _,_,q6_MBPO_eval = get_section_results(q6_MBPO)
 
 
 
-itr = np.arange(5)
+itr = np.arange(10)
 
 fig1 = plt.figure()
 plt.plot(itr, q6_SAC_eval, label='Model-Free SAC')
