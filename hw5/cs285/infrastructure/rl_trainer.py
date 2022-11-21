@@ -40,6 +40,8 @@ class RL_Trainer(object):
         # Get params, create logger
         self.params = params
         self.logger = Logger(self.params['logdir'])
+        self.return_history = []
+        self.return_history_train = []
 
         # Set random seeds
         seed = self.params['seed']
@@ -375,6 +377,12 @@ class RL_Trainer(object):
             if itr == 0:
                 self.initial_return = np.mean(train_returns)
             logs["Initial_DataCollection_AverageReturn"] = self.initial_return
+            #!!!
+            self.return_history.append(np.mean(eval_returns))
+            logs['Eval_History_MaxReturn'] = max(self.return_history)
+            self.return_history_train.append(np.mean(train_returns))
+            logs['Train_History_MaxReturn'] = max(self.return_history_train)
+            #!!!
 
             # perform the logging
             for key, value in logs.items():
@@ -383,6 +391,9 @@ class RL_Trainer(object):
                     self.logger.log_scalar(value, key, itr)
                 except:
                     pdb.set_trace()
+            #!!!
+            print(self.params['exp_name'])
+            #!!!
             print('Done logging...\n\n')
 
             self.logger.flush()
