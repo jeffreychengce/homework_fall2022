@@ -6,6 +6,7 @@ Created on Sat Oct 29 14:09:46 2022
 """
 
 import numpy as np
+import torch
 
 n = 10
 
@@ -36,3 +37,8 @@ next_ob = np.mean(model_obs,axis=0)
 
 variance = np.random.rand(4,2)
 std = np.sqrt(variance)
+
+a = torch.randn(3,3)
+print(a)
+print((a<0).bool().int())
+print((a<0).bool().int().type())

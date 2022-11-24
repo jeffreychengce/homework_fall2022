@@ -45,7 +45,10 @@ class IQLCritic(BaseCritic):
         # TODO define value function
         # HINT: see Q_net definition above and optimizer below
         ### YOUR CODE HERE ###
-        self.v_net = None
+        #!!!
+        self.v_net = network_initializer(self.ob_dim, 1)
+        self.v_net.to(ptu.device)
+        #!!!
 
         self.v_optimizer = self.optimizer_spec.constructor(
             self.v_net.parameters(),
@@ -61,7 +64,9 @@ class IQLCritic(BaseCritic):
         """
         Implement expectile loss on the difference between q and v
         """
-        pass
+        #!!!
+        return torch.abs(self.iql_expectile - (diff <= 0).bool().int()) * (diff**2)
+        #!!!
 
     def update_v(self, ob_no, ac_na):
         """
@@ -72,7 +77,19 @@ class IQLCritic(BaseCritic):
         
 
         ### YOUR CODE HERE ###
-        value_loss = None
+        #!!!
+        qa_vals = self.q_net_target(ob_no)
+        q_vals = torch.gather(qa_vals, 1, ac_na.type(torch.int64).unsqueeze(1))
+        v = self.v_net(ob_no)
+        u = q_vals.detach() - v
+        l2 = torch.abs(self.iql_expectile - (u <= 0).bool().int()) * (u**2)
+        value_loss = torch.mean(l2)
+        # print("V Update")
+        # print(q_vals.shape)
+        # print(v.shape)
+        # print(l2.shape)
+        # print(value_loss.shape)
+        #!!!
         
         assert value_loss.shape == ()
         self.v_optimizer.zero_grad()
@@ -95,7 +112,17 @@ class IQLCritic(BaseCritic):
         terminal_n = ptu.from_numpy(terminal_n)
         
         ### YOUR CODE HERE ###
-        loss = None
+        #!!!
+        qa_vals = self.q_net(ob_no)
+        q_vals = torch.gather(qa_vals, 1, ac_na.type(torch.int64).unsqueeze(1)).squeeze(1)
+        v_tp1 = self.v_net(next_ob_no).squeeze(1).detach()
+        #l = (reward_n + self.gamma*(1-terminal_n)*v_tp1 - q_vals)
+        loss = self.mse_loss(reward_n + self.gamma*(1-terminal_n)*v_tp1, q_vals)
+        # print("Q Update")
+        # print(q_vals.shape)
+        # print((reward_n + self.gamma*self.v_net(next_ob_no).squeeze(1) - q_vals).shape)
+        # print(loss.shape)
+        #!!!
 
         assert loss.shape == ()
         self.optimizer.zero_grad()

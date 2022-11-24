@@ -56,7 +56,8 @@ class RNDModel(nn.Module, BaseExplorationModel):
         #!!!
         f_hat = self.f_hat(ob_no)
         f_star = self.f(ob_no).detach()
-        error = torch.sum((f_hat - f_star)**2, dim=1)
+        error = torch.norm(f_hat - f_star, dim=1)
+        #error = torch.sum((f_hat - f_star)**2, dim=1)
         return error
         #!!!
         

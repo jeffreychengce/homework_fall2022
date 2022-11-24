@@ -48,8 +48,8 @@ def get_section_results_mean(file):
 
 
 #%% q1
-q1_easy_rnd = glob.glob('**/hw5_expl_q1_env1_rnd_PointmassEasy-v0_21-11-2022_00-16-04/*')[5]
-q1_easy_rand = glob.glob('**/hw5_expl_q1_env1_random_PointmassEasy-v0_21-11-2022_00-16-04/*')[5]
+q1_easy_rnd = glob.glob('**/hw5_expl_q1_env1_rnd_PointmassEasy-v0_21-11-2022_16-35-21/*')[5]
+q1_easy_rand = glob.glob('**/hw5_expl_q1_env1_random_PointmassEasy-v0_21-11-2022_16-35-21/*')[5]
 
 
 steps,train,q1_easy_rnd = get_section_results(q1_easy_rnd)
@@ -65,8 +65,8 @@ plt.title('Learning Curves for PointmassEasy')
 fig1.set_size_inches(10, 6)
 plt.show()
 
-q1_med_rnd = glob.glob('**/hw5_expl_q1_env2_rnd_PointmassMedium-v0_20-11-2022_23-23-06/*')[5]
-q1_med_rand = glob.glob('**/hw5_expl_q1_env2_random_PointmassMedium-v0_21-11-2022_00-16-04/*')[5]
+q1_med_rnd = glob.glob('**/hw5_expl_q1_env2_rnd_PointmassMedium-v0_21-11-2022_16-20-20/*')[5]
+q1_med_rand = glob.glob('**/hw5_expl_q1_env2_random_PointmassMedium-v0_21-11-2022_16-35-21/*')[5]
 
 
 steps,train,q1_med_rnd = get_section_results(q1_med_rnd)
@@ -82,8 +82,8 @@ plt.title('Learning Curves for PointmassMedium')
 fig1.set_size_inches(10, 6)
 plt.show()
 
-q1_med_rnd = glob.glob('**/hw5_expl_q1_env2_rnd_PointmassMedium-v0_20-11-2022_23-23-06/*')[5]
-q1_med_boltz = glob.glob('**/hw5_expl_q1_alg_med_PointmassMedium-v0_21-11-2022_01-22-03/*')[5]
+q1_med_rnd = glob.glob('**/hw5_expl_q1_env2_rnd_PointmassMedium-v0_21-11-2022_16-20-20/*')[5]
+q1_med_boltz = glob.glob('**/hw5_expl_q1_alg_med_PointmassMedium-v0_21-11-2022_17-24-25/*')[5]
 
 
 steps,train,q1_med_rnd = get_section_results(q1_med_rnd)
@@ -99,8 +99,8 @@ plt.title('Learning Curves for PointmassMedium')
 fig1.set_size_inches(10, 6)
 plt.show()
 
-q1_hard_rnd = glob.glob('**/hw5_expl_q1_hard_rnd_PointmassHard-v0_21-11-2022_00-16-04/*')[5]
-q1_hard_boltz = glob.glob('**/hw5_expl_q1_alg_hard_PointmassHard-v0_21-11-2022_01-22-03/*')[5]
+q1_hard_rnd = glob.glob('**/hw5_expl_q1_hard_rnd_PointmassHard-v0_21-11-2022_17-24-25/*')[5]
+q1_hard_boltz = glob.glob('**/hw5_expl_q1_alg_hard_PointmassHard-v0_21-11-2022_17-24-25/*')[5]
 
 
 steps,train,q1_hard_rnd = get_section_results(q1_hard_rnd)
@@ -117,182 +117,219 @@ fig1.set_size_inches(10, 6)
 plt.show()
 
 #%% q2
+q2_med_dql = glob.glob('**/hw5_expl_q2_dqn_PointmassMedium-v0_21-11-2022_03-14-13/*')[5]
+q2_med_cql = glob.glob('**/hw5_expl_q2_cql_PointmassMedium-v0_21-11-2022_03-14-13/*')[5]
 
-# q2 = glob.glob('**/hw4_q2_obstacles_singleiteration_obstacles-cs285-v0_30-10-2022_19-53-25/*')[0]
+steps,train,q2_med_dql = get_section_results(q2_med_dql)
+steps,_,q2_med_cql = get_section_results(q2_med_cql)
 
+fig1 = plt.figure()
+plt.plot(steps, q2_med_dql, label='DQN')
+plt.plot(steps, q2_med_cql, label='CQL')
+plt.xlabel('Iteration')
+plt.legend(loc='lower right')
+plt.ylabel('Average Return')
+plt.title('Learning Curves for PointmassMedium')
+fig1.set_size_inches(10, 6)
+plt.show()
 
+q2_5000_dql = glob.glob('**/hw5_expl_q2_dqn_PointmassMedium-v0_21-11-2022_17-49-31/*')[5]
+q2_15000_dql = glob.glob('**/hw5_expl_q2_cql_PointmassMedium-v0_21-11-2022_17-49-31/*')[5]
 
+steps,train,q2_5000_dql = get_section_results(q2_5000_dql)
+steps,_,q2_15000_dql = get_section_results(q2_15000_dql)
 
-# steps,q2_train,q2_eval = get_section_results(q2)
+fig1 = plt.figure()
+plt.plot(steps, q2_5000_dql, label='5,000')
+plt.plot(steps, q2_15000_dql, label='15,000')
+plt.plot(steps, q2_med_dql, label='10,000')
+plt.xlabel('Iteration')
+plt.legend(loc='lower right', title='Number of Exploration Steps')
+plt.ylabel('Average Return')
+plt.title('Learning Curves for DQN in PointmassMedium, Varying Exploration Steps')
+fig1.set_size_inches(10, 6)
+plt.show()
 
+q2_5000_cql = glob.glob('**/hw5_expl_q2_dqn_numsteps_5000_PointmassMedium-v0_21-11-2022_18-08-44/*')[5]
+q2_15000_cql = glob.glob('**/hw5_expl_q2_dqn_numsteps_15000_PointmassMedium-v0_21-11-2022_18-08-44/*')[5]
 
-# itr = np.arange(len(q2_eval))
+steps,train,q2_5000_cql = get_section_results(q2_5000_cql)
+steps,_,q2_15000_cql = get_section_results(q2_15000_cql)
 
-# fig1 = plt.figure()
-# plt.scatter(itr, q2_train, label='Training Return')
-# plt.scatter(itr, q2_eval, label='Evaluation Return')
-# plt.xlabel('Iteration')
-# plt.legend(loc='lower right')
-# plt.ylabel('Average Return')
-# plt.title('MPC in Obstacles Environment')
-# fig1.set_size_inches(10, 6)
-# plt.show()
+fig1 = plt.figure()
+plt.plot(steps, q2_5000_cql, label='5,000')
+plt.plot(steps, q2_15000_cql, label='15,000')
+plt.plot(steps, q2_med_cql, label='10,000')
+plt.xlabel('Iteration')
+plt.legend(loc='lower right', title='Number of Exploration Steps')
+plt.ylabel('Average Return')
+plt.title('Learning Curves for CQL in PointmassMedium, Varying Exploration Steps')
+fig1.set_size_inches(10, 6)
+plt.show()
 
-# #%% q3
+q2_alpha002 = glob.glob('**/hw5_expl_q2_alpha0.02_PointmassMedium-v0_21-11-2022_18-36-49/*')[5]
+q2_alpha05 = glob.glob('**/hw5_expl_q2_alpha0.5_PointmassMedium-v0_21-11-2022_18-36-49/*')[5]
 
-# q3_obstacles = glob.glob('**/hw4_q3_obstacles_obstacles-cs285-v0_30-10-2022_19-53-44/*')[0]
-# q3_reacher = glob.glob('**/hw4_q3_reacher_reacher-cs285-v0_30-10-2022_20-06-57/*')[0]
-# q3_cheetah = glob.glob('**/hw4_q3_cheetah_cheetah-cs285-v0_30-10-2022_21-06-51/*')[0]
+steps,train,q2_alpha002 = get_section_results(q2_alpha002)
+steps,_,q2_alpha05 = get_section_results(q2_alpha05)
 
-# steps,q3_obstacles_train,q3_obstacles_eval = get_section_results(q3_obstacles)
-# _,q3_reacher_train,q3_reacher_eval = get_section_results(q3_reacher)
-# _,q3_cheetah_train,q3_cheetah_eval = get_section_results(q3_cheetah)
-
-# itr_obstacles = np.arange(len(q3_obstacles_eval))
-# itr_reacher = np.arange(len(q3_reacher_eval))
-# itr_cheetah = np.arange(len(q3_cheetah_eval))
-
-# fig1 = plt.figure()
-# #plt.plot(itr_obstacles, q3_obstacles_train, label='Training Returns')
-# plt.plot(itr_obstacles, q3_obstacles_eval, label='Evaluation Returns')
-# plt.xlabel('Iteration')
-# #plt.legend(loc='lower left')
-# plt.ylabel('Average Evaluation Return')
-# plt.title('On-Policy MBRL in the Obstacles Environment')
-# fig1.set_size_inches(10, 6)
-# plt.show()
-
-# fig1 = plt.figure()
-# #plt.plot(itr_reacher, q3_reacher_train, label='Training Returns')
-# plt.plot(itr_reacher, q3_reacher_eval, label='Evaluation Returns')
-# plt.xlabel('Iteration')
-# #plt.legend(loc='lower left')
-# plt.ylabel('Average Evaluation Return')
-# plt.title('On-Policy MBRL in the Reacher Environment')
-# fig1.set_size_inches(10, 6)
-# plt.show()
-
-# fig1 = plt.figure()
-# #plt.plot(itr_cheetah, q3_cheetah_train, label='Training Returns')
-# plt.plot(itr_cheetah, q3_cheetah_eval, label='Evaluation Returns')
-# plt.xlabel('Iteration')
-# #plt.legend(loc='lower left')
-# plt.ylabel('Average Evaluation Return')
-# plt.title('On-Policy MBRL in the Cheetah Environment')
-# fig1.set_size_inches(10, 6)
-# plt.show()
-
-# #%% q4
-
-# q4_horizon5 = glob.glob('**/hw4_q4_reacher_horizon5_reacher-cs285-v0_31-10-2022_00-48-42/*')[0]
-# q4_horizon15 = glob.glob('**/hw4_q4_reacher_horizon15_reacher-cs285-v0_31-10-2022_00-48-42/*')[0]
-# q4_horizon30 = glob.glob('**/hw4_q4_reacher_horizon30_reacher-cs285-v0_31-10-2022_00-48-42/*')[0]
-
-# q4_numseq100 = glob.glob('**/hw4_q4_reacher_numseq100_reacher-cs285-v0_31-10-2022_12-24-54/*')[0]
-# q4_numseq1000 = glob.glob('**/hw4_q4_reacher_numseq1000_reacher-cs285-v0_31-10-2022_12-24-54/*')[0]
-
-# q4_ensemble1 = glob.glob('**/hw4_q4_reacher_ensemble1_reacher-cs285-v0_31-10-2022_09-11-49/*')[0]
-# q4_ensemble3 = glob.glob('**/hw4_q4_reacher_ensemble3_reacher-cs285-v0_31-10-2022_09-11-49/*')[0]
-# q4_ensemble5 = glob.glob('**/hw4_q4_reacher_ensemble5_reacher-cs285-v0_31-10-2022_09-11-49/*')[0]
-
-# _,_,q4_horizon5_eval = get_section_results(q4_horizon5)
-# _,_,q4_horizon15_eval = get_section_results(q4_horizon15)
-# _,_,q4_horizon30_eval = get_section_results(q4_horizon30)
-
-# _,_,q4_numseq100_eval = get_section_results(q4_numseq100)
-# _,_,q4_numseq1000_eval = get_section_results(q4_numseq1000)
-
-# _,_,q4_ensemble1_eval = get_section_results(q4_ensemble1)
-# _,_,q4_ensemble3_eval = get_section_results(q4_ensemble3)
-# _,_,q4_ensemble5_eval = get_section_results(q4_ensemble5)
-
-# itr = np.arange(15)
-
-# fig1 = plt.figure()
-# plt.plot(itr, q4_horizon5_eval, label='Horizon: 5')
-# plt.plot(itr, q4_horizon15_eval, label='Horizon: 15')
-# plt.plot(itr, q4_horizon30_eval, label='Horizon: 30')
-# plt.xlabel('Iteration')
-# plt.legend(loc='lower right')
-# plt.ylabel('Average Evaluation Return')
-# plt.title('On-Policy MBRL in the Reacher Environment, Varying Planning Horizons')
-# fig1.set_size_inches(10, 6)
-# plt.show()
-
-# fig1 = plt.figure()
-# plt.plot(itr, q4_numseq100_eval, label='Candidate Sequences: 100')
-# plt.plot(itr, q4_numseq1000_eval, label='Candidate Sequences: 1000')
-# plt.xlabel('Iteration')
-# plt.legend(loc='lower right')
-# plt.ylabel('Average Evaluation Return')
-# plt.title('On-Policy MBRL in the Reacher Environment, Varying Candidate Action Sequences')
-# fig1.set_size_inches(10, 6)
-# plt.show()
+fig1 = plt.figure()
+plt.plot(steps, q2_alpha002, label='0.02')
+plt.plot(steps, q2_alpha05, label='0.5')
+plt.plot(steps, q2_med_cql, label='0.1')
+plt.xlabel('Iteration')
+plt.legend(loc='lower right')
+plt.ylabel('Average Return')
+plt.title('Learning Curves for PointmassMedium, Varying CQL Alphas')
+fig1.set_size_inches(10, 6)
+plt.show()
 
 
-# fig1 = plt.figure()
-# plt.plot(itr, q4_ensemble1_eval, label='Ensemble Size: 5')
-# plt.plot(itr, q4_ensemble3_eval, label='Ensemble Size: 15')
-# plt.plot(itr, q4_ensemble5_eval, label='Ensemble Size: 30')
-# plt.xlabel('Iteration')
-# plt.legend(loc='lower right')
-# plt.ylabel('Average Evaluation Return')
-# plt.title('On-Policy MBRL in the Reacher Environment, Varying Ensemble Sizes')
-# fig1.set_size_inches(10, 6)
-# plt.show()
-# #%% q5
+#%% q3
+q3_med_dql = glob.glob('**/hw5_expl_q3_medium_dqn_PointmassMedium-v0_21-11-2022_18-36-49/*')[5]
+q3_med_cql = glob.glob('**/hw5_expl_q3_medium_cql_PointmassMedium-v0_21-11-2022_18-36-49/*')[5]
 
-# q5_random = glob.glob('**/hw4_q5_cheetah_random_cheetah-cs285-v0_31-10-2022_17-07-35/*')[0]
-# q5_cem2 = glob.glob('**/hw4_q5_cheetah_cem_2_cheetah-cs285-v0_31-10-2022_17-07-35/*')[0]
-# q5_cem4 = glob.glob('**/hw4_q5_cheetah_cem_4_cheetah-cs285-v0_31-10-2022_11-19-10/*')[0]
+steps,train,q3_med_dql = get_section_results(q3_med_dql)
+steps,_,q3_med_cql = get_section_results(q3_med_cql)
+
+fig1 = plt.figure()
+plt.plot(steps, q3_med_dql, label='DQN')
+plt.plot(steps, q3_med_cql, label='CQL')
+plt.xlabel('Iteration')
+plt.legend(loc='lower right')
+plt.ylabel('Average Return')
+plt.title('Learning Curves for PointmassMedium')
+fig1.set_size_inches(10, 6)
+plt.show()
+
+q3_hard_dql = glob.glob('**/hw5_expl_q3_hard_dqn_PointmassHard-v0_21-11-2022_18-36-49/*')[5]
+q3_hard_cql = glob.glob('**/hw5_expl_q3_hard_cql_PointmassHard-v0_21-11-2022_18-36-49/*')[5]
+
+steps,train,q3_hard_dql = get_section_results(q3_hard_dql)
+steps,_,q3_hard_cql = get_section_results(q3_hard_cql)
+
+fig1 = plt.figure()
+plt.plot(steps, q3_hard_dql, label='DQN')
+plt.plot(steps, q3_hard_cql, label='CQL')
+plt.xlabel('Iteration')
+plt.legend(loc='lower right')
+plt.ylabel('Average Return')
+plt.title('Learning Curves for PointmassHard')
+fig1.set_size_inches(10, 6)
+plt.show()
+
+#%% q4
+
+q4_es_01 = glob.glob('**/hw5_expl_q4_awac_easy_supervised_lam0.1_PointmassEasy-v0_21-11-2022_22-23-51/*')[5]
+q4_es_1 = glob.glob('**/hw5_expl_q4_awac_easy_supervised_lam1_PointmassEasy-v0_21-11-2022_22-23-51/*')[5]
+q4_es_2 = glob.glob('**/hw5_expl_q4_awac_easy_supervised_lam2_PointmassEasy-v0_21-11-2022_22-23-51/*')[5]
+q4_es_10 = glob.glob('**/hw5_expl_q4_awac_easy_supervised_lam10_PointmassEasy-v0_21-11-2022_22-23-51/*')[5]
+q4_es_20 = glob.glob('**/hw5_expl_q4_awac_easy_supervised_lam20_PointmassEasy-v0_21-11-2022_22-23-52/*')[5]
+q4_es_50 = glob.glob('**/hw5_expl_q4_awac_easy_supervised_lam50_PointmassEasy-v0_21-11-2022_22-23-52/*')[5]
+
+steps,_,q4_es_01 = get_section_results(q4_es_01)
+steps,_,q4_es_1 = get_section_results(q4_es_1)
+steps,_,q4_es_2 = get_section_results(q4_es_2)
+steps,_,q4_es_10 = get_section_results(q4_es_10)
+steps,_,q4_es_20 = get_section_results(q4_es_20)
+steps,_,q4_es_50 = get_section_results(q4_es_50)
+
+fig1 = plt.figure()
+plt.plot(steps, q4_es_01, label='0.1')
+plt.plot(steps, q4_es_1, label='1')
+plt.plot(steps, q4_es_2, label='2')
+plt.plot(steps, q4_es_10, label='10')
+plt.plot(steps, q4_es_20, label='20')
+plt.plot(steps, q4_es_50, label='50')
+plt.xlabel('Iteration')
+plt.legend(loc='lower right', title='Lambda')
+plt.ylabel('Average Return')
+plt.title('AWAC (Supervised) Learning Curves for PointmassEasy, Varying Lambdas')
+fig1.set_size_inches(10, 6)
+plt.show()
+
+q4_eu_01 = glob.glob('**/hw5_expl_q4_awac_easy_unsupervised_lam0.1_PointmassEasy-v0_21-11-2022_22-23-50/*')[5]
+q4_eu_1 = glob.glob('**/hw5_expl_q4_awac_easy_unsupervised_lam1_PointmassEasy-v0_21-11-2022_22-23-50/*')[5]
+q4_eu_2 = glob.glob('**/hw5_expl_q4_awac_easy_unsupervised_lam2_PointmassEasy-v0_21-11-2022_22-23-51/*')[5]
+q4_eu_10 = glob.glob('**/hw5_expl_q4_awac_easy_unsupervised_lam10_PointmassEasy-v0_21-11-2022_22-23-51/*')[5]
+q4_eu_20 = glob.glob('**/hw5_expl_q4_awac_easy_unsupervised_lam20_PointmassEasy-v0_21-11-2022_22-23-51/*')[5]
+q4_eu_50 = glob.glob('**/hw5_expl_q4_awac_easy_unsupervised_lam50_PointmassEasy-v0_21-11-2022_22-23-51/*')[5]
 
 
-# _,_,q5_random_eval = get_section_results(q5_random)
-# _,_,q5_cem2_eval = get_section_results(q5_cem2)
-# _,_,q5_cem4_eval = get_section_results(q5_cem4)
+steps,_,q4_eu_01 = get_section_results(q4_eu_01)
+steps,_,q4_eu_1 = get_section_results(q4_eu_1)
+steps,_,q4_eu_2 = get_section_results(q4_eu_2)
+steps,_,q4_eu_10 = get_section_results(q4_eu_10)
+steps,_,q4_eu_20 = get_section_results(q4_eu_20)
+steps,_,q4_eu_50 = get_section_results(q4_eu_50)
+
+fig1 = plt.figure()
+plt.plot(steps, q4_eu_01, label='0.1')
+plt.plot(steps, q4_eu_1, label='1')
+plt.plot(steps, q4_eu_2, label='2')
+plt.plot(steps, q4_eu_10, label='10')
+plt.plot(steps, q4_eu_20, label='20')
+plt.plot(steps, q4_eu_50, label='50')
+plt.xlabel('Iteration')
+plt.legend(loc='lower right', title='Lambda')
+plt.ylabel('Average Return')
+plt.title('AWAC (Unsupervised) Learning Curves for PointmassEasy, Varying Lambdas')
+fig1.set_size_inches(10, 6)
+plt.show()
+
+q4_ms_01 = glob.glob('**/hw5_expl_q4_awac_medium_supervised_lam0.1_PointmassMedium-v0_21-11-2022_22-23-51/*')[5]
+q4_ms_1 = glob.glob('**/hw5_expl_q4_awac_medium_supervised_lam1_PointmassMedium-v0_21-11-2022_22-23-51/*')[5]
+q4_ms_2 = glob.glob('**/hw5_expl_q4_awac_medium_supervised_lam2_PointmassMedium-v0_21-11-2022_22-23-51/*')[5]
+q4_ms_10 = glob.glob('**/hw5_expl_q4_awac_medium_supervised_lam10_PointmassMedium-v0_21-11-2022_22-23-50/*')[5]
+q4_ms_20 = glob.glob('**/hw5_expl_q4_awac_medium_supervised_lam20_PointmassMedium-v0_21-11-2022_22-23-53/*')[5]
+q4_ms_50 = glob.glob('**/hw5_expl_q4_awac_medium_supervised_lam50_PointmassMedium-v0_21-11-2022_22-23-51/*')[5]
+
+steps,_,q4_ms_01 = get_section_results(q4_ms_01)
+steps,_,q4_ms_1 = get_section_results(q4_ms_1)
+steps,_,q4_ms_2 = get_section_results(q4_ms_2)
+steps,_,q4_ms_10 = get_section_results(q4_ms_10)
+steps,_,q4_ms_20 = get_section_results(q4_ms_20)
+steps,_,q4_ms_50 = get_section_results(q4_ms_50)
+
+fig1 = plt.figure()
+plt.plot(steps, q4_ms_01, label='0.1')
+plt.plot(steps, q4_ms_1, label='1')
+plt.plot(steps, q4_ms_2, label='2')
+plt.plot(steps, q4_ms_10, label='10')
+plt.plot(steps, q4_ms_20, label='20')
+plt.plot(steps, q4_ms_50, label='50')
+plt.xlabel('Iteration')
+plt.legend(loc='lower right', title='Lambda')
+plt.ylabel('Average Return')
+plt.title('AWAC (Supervised) Learning Curves for PointmassMedium, Varying Lambdas')
+fig1.set_size_inches(10, 6)
+plt.show()
+
+q4_mu_01 = glob.glob('**/hw5_expl_q4_awac_medium_unsupervised_lam0.1_PointmassMedium-v0_21-11-2022_22-23-51/*')[5]
+q4_mu_1 = glob.glob('**/hw5_expl_q4_awac_medium_unsupervised_lam1_PointmassMedium-v0_21-11-2022_22-23-51/*')[5]
+q4_mu_2 = glob.glob('**/hw5_expl_q4_awac_medium_unsupervised_lam2_PointmassMedium-v0_21-11-2022_22-23-50/*')[5]
+q4_mu_10 = glob.glob('**/hw5_expl_q4_awac_medium_unsupervised_lam10_PointmassMedium-v0_21-11-2022_22-23-51/*')[5]
+q4_mu_20 = glob.glob('**/hw5_expl_q4_awac_medium_unsupervised_lam20_PointmassMedium-v0_21-11-2022_22-23-51/*')[5]
+q4_mu_50 = glob.glob('**/hw5_expl_q4_awac_medium_unsupervised_lam50_PointmassMedium-v0_21-11-2022_22-23-51/*')[5]
 
 
+steps,_,q4_mu_01 = get_section_results(q4_mu_01)
+steps,_,q4_mu_1 = get_section_results(q4_mu_1)
+steps,_,q4_mu_2 = get_section_results(q4_mu_2)
+steps,_,q4_mu_10 = get_section_results(q4_mu_10)
+steps,_,q4_mu_20 = get_section_results(q4_mu_20)
+steps,_,q4_mu_50 = get_section_results(q4_mu_50)
 
-# itr = np.arange(5)
-
-# fig1 = plt.figure()
-# plt.plot(itr, q5_random_eval, label='Random Shooting')
-# plt.plot(itr, q5_cem2_eval, label='2 CEM Iterations')
-# plt.plot(itr, q5_cem4_eval, label='4 CEM Iterations')
-# plt.xlabel('Iteration')
-# plt.legend(loc='upper left')
-# plt.ylabel('Average Evaluation Return')
-# plt.title('On-Policy MBRL in the Cheetah Environment, Varying Action Selection')
-# fig1.set_size_inches(10, 6)
-# plt.show()
-
-
-
-# #%% q6
-
-# q6_SAC = glob.glob('**/hw4_q6_cheetah_rlen1_cheetah-cs285-v0_31-10-2022_17-46-17/*')[0]
-# q6_Dyna = glob.glob('**/hw4_q6_cheetah_rlenl0_cheetah-cs285-v0_31-10-2022_17-46-17/*')[0]
-# q6_MBPO = glob.glob('**/hw4_q6_cheetah_rlen10_cheetah-cs285-v0_30-10-2022_22-32-40/*')[0]
-
-
-# _,_,q6_SAC_eval = get_section_results(q6_SAC)
-# _,_,q6_Dyna_eval = get_section_results(q6_Dyna)
-# _,_,q6_MBPO_eval = get_section_results(q6_MBPO)
-
-
-
-# itr = np.arange(10)
-
-# fig1 = plt.figure()
-# plt.plot(itr, q6_SAC_eval, label='Model-Free SAC')
-# plt.plot(itr, q6_Dyna_eval, label='Dyna: Single Step Rollouts')
-# plt.plot(itr, q6_MBPO_eval, label='MBPO: 10 Step Rollouts')
-# plt.xlabel('Iteration')
-# plt.legend(loc='upper left')
-# plt.ylabel('Average Evaluation Return')
-# plt.title('Variations of MBPO in the Cheetah Environment')
-# fig1.set_size_inches(10, 6)
-# plt.show()
-
-
-
+fig1 = plt.figure()
+plt.plot(steps, q4_mu_01, label='0.1')
+plt.plot(steps, q4_mu_1, label='1')
+plt.plot(steps, q4_mu_2, label='2')
+plt.plot(steps, q4_mu_10, label='10')
+plt.plot(steps, q4_mu_20, label='20')
+plt.plot(steps, q4_mu_50, label='50')
+plt.xlabel('Iteration')
+plt.legend(loc='lower right', title='Lambda')
+plt.ylabel('Average Return')
+plt.title('AWAC (Unsupervised) Learning Curves for PointmassMedium, Varying Lambdas')
+fig1.set_size_inches(10, 6)
+plt.show()

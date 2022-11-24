@@ -312,12 +312,18 @@ class RL_Trainer(object):
         logs["Eval_AverageEpLen"] = np.mean(eval_ep_lens)
         
         logs['Buffer size'] = self.agent.replay_buffer.num_in_buffer
-
+        #!!!
+        self.return_history.append(np.mean(eval_returns))
+        logs['Eval_History_MaxReturn'] = max(self.return_history)
+        #!!!
         sys.stdout.flush()
 
         for key, value in logs.items():
             print('{} : {}'.format(key, value))
             self.logger.log_scalar(value, key, self.agent.t)
+        #!!!
+        print(self.params['exp_name'])
+        #!!!
         print('Done logging...\n\n')
 
         self.logger.flush()
