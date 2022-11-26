@@ -141,8 +141,9 @@ steps,_,q2_15000_dql = get_section_results(q2_15000_dql)
 
 fig1 = plt.figure()
 plt.plot(steps, q2_5000_dql, label='5,000')
-plt.plot(steps, q2_15000_dql, label='15,000')
 plt.plot(steps, q2_med_dql, label='10,000')
+plt.plot(steps, q2_15000_dql, label='15,000')
+
 plt.xlabel('Iteration')
 plt.legend(loc='lower right', title='Number of Exploration Steps')
 plt.ylabel('Average Return')
@@ -158,8 +159,9 @@ steps,_,q2_15000_cql = get_section_results(q2_15000_cql)
 
 fig1 = plt.figure()
 plt.plot(steps, q2_5000_cql, label='5,000')
-plt.plot(steps, q2_15000_cql, label='15,000')
 plt.plot(steps, q2_med_cql, label='10,000')
+plt.plot(steps, q2_15000_cql, label='15,000')
+
 plt.xlabel('Iteration')
 plt.legend(loc='lower right', title='Number of Exploration Steps')
 plt.ylabel('Average Return')
@@ -175,8 +177,9 @@ steps,_,q2_alpha05 = get_section_results(q2_alpha05)
 
 fig1 = plt.figure()
 plt.plot(steps, q2_alpha002, label='0.02')
-plt.plot(steps, q2_alpha05, label='0.5')
 plt.plot(steps, q2_med_cql, label='0.1')
+plt.plot(steps, q2_alpha05, label='0.5')
+
 plt.xlabel('Iteration')
 plt.legend(loc='lower right')
 plt.ylabel('Average Return')
@@ -331,5 +334,109 @@ plt.xlabel('Iteration')
 plt.legend(loc='lower right', title='Lambda')
 plt.ylabel('Average Return')
 plt.title('AWAC (Unsupervised) Learning Curves for PointmassMedium, Varying Lambdas')
+fig1.set_size_inches(10, 6)
+plt.show()
+
+#%% q5
+q5_es_5 = glob.glob('**/hw5_expl_q5_iql_easy_supervised_lam1_tau0.5_PointmassEasy-v0_22-11-2022_19-31-02/*')[5]
+q5_es_7 = glob.glob('**/hw5_expl_q5_iql_easy_supervised_lam1_tau0.7_PointmassEasy-v0_22-11-2022_19-31-02/*')[5]
+q5_es_9 = glob.glob('**/hw5_expl_q5_iql_easy_supervised_lam1_tau0.9_PointmassEasy-v0_22-11-2022_19-31-02/*')[5]
+q5_es_99 = glob.glob('**/hw5_expl_q5_iql_easy_supervised_lam1_tau0.99_PointmassEasy-v0_22-11-2022_19-31-02/*')[5]
+
+steps,_,q5_es_5 = get_section_results(q5_es_5)
+steps,_,q5_es_7 = get_section_results(q5_es_7)
+steps,_,q5_es_9 = get_section_results(q5_es_9)
+steps,_,q5_es_99 = get_section_results(q5_es_99)
+
+
+fig1 = plt.figure()
+plt.plot(steps, q5_es_5, label='0.5')
+plt.plot(steps, q5_es_7, label='0.7')
+plt.plot(steps, q5_es_9, label='0.9')
+plt.plot(steps, q5_es_99, label='0.99')
+plt.xlabel('Iteration')
+plt.legend(loc='lower right', title='Tau')
+plt.ylabel('Average Return')
+plt.title('IQL (Supervised) Learning Curves for PointmassEasy, Varying Tau Values, Lambda=1')
+fig1.set_size_inches(10, 6)
+plt.show()
+
+q5_eu_5 = glob.glob('**/hw5_expl_q5_iql_easy_unsupervised_lam2_tau0.5_PointmassEasy-v0_22-11-2022_19-31-02/*')[5]
+q5_eu_7 = glob.glob('**/hw5_expl_q5_iql_easy_unsupervised_lam2_tau0.7_PointmassEasy-v0_22-11-2022_19-31-02/*')[5]
+q5_eu_9 = glob.glob('**/hw5_expl_q5_iql_easy_unsupervised_lam2_tau0.9_PointmassEasy-v0_22-11-2022_19-31-02/*')[5]
+q5_eu_99 = glob.glob('**/hw5_expl_q5_iql_easy_unsupervised_lam2_tau0.99_PointmassEasy-v0_22-11-2022_19-31-02/*')[5]
+
+steps,_,q5_eu_5 = get_section_results(q5_eu_5)
+steps,_,q5_eu_7 = get_section_results(q5_eu_7)
+steps,_,q5_eu_9 = get_section_results(q5_eu_9)
+steps,_,q5_eu_99 = get_section_results(q5_eu_99)
+
+
+fig1 = plt.figure()
+plt.plot(steps, q5_eu_5, label='0.5')
+plt.plot(steps, q5_eu_7, label='0.7')
+plt.plot(steps, q5_eu_9, label='0.9')
+plt.plot(steps, q5_eu_99, label='0.99')
+plt.xlabel('Iteration')
+plt.legend(loc='lower right', title='Tau')
+plt.ylabel('Average Return')
+plt.title('IQL (Unsupervised) Learning Curves for PointmassEasy, Varying Tau Values, Lambda=2')
+fig1.set_size_inches(10, 6)
+plt.show()
+
+q5_ms_5 = glob.glob('**/hw5_expl_q5_iql_medium_supervised_lam20_tau0.5_PointmassMedium-v0_22-11-2022_19-31-02/*')[5]
+q5_ms_7 = glob.glob('**/hw5_expl_q5_iql_medium_supervised_lam20_tau0.7_PointmassMedium-v0_22-11-2022_19-31-02/*')[5]
+q5_ms_9 = glob.glob('**/hw5_expl_q5_iql_medium_supervised_lam20_tau0.9_PointmassMedium-v0_22-11-2022_19-31-02/*')[5]
+q5_ms_99 = glob.glob('**/hw5_expl_q5_iql_medium_supervised_lam20_tau0.99_PointmassMedium-v0_22-11-2022_19-31-02/*')[5]
+
+steps,_,q5_ms_5 = get_section_results(q5_ms_5)
+steps,_,q5_ms_7 = get_section_results(q5_ms_7)
+steps,_,q5_ms_9 = get_section_results(q5_ms_9)
+steps,_,q5_ms_99 = get_section_results(q5_ms_99)
+
+
+fig1 = plt.figure()
+plt.plot(steps, q5_ms_5, label='0.5')
+plt.plot(steps, q5_ms_7, label='0.7')
+plt.plot(steps, q5_ms_9, label='0.9')
+plt.plot(steps, q5_ms_99, label='0.99')
+plt.xlabel('Iteration')
+plt.legend(loc='lower right', title='Tau')
+plt.ylabel('Average Return')
+plt.title('IQL (Supervised) Learning Curves for PointmassMedium, Varying Tau Values, Lambda=20')
+fig1.set_size_inches(10, 6)
+plt.show()
+
+q5_mu_5 = glob.glob('**/hw5_expl_q5_iql_medium_unsupervised_lam1_tau0.5_PointmassMedium-v0_22-11-2022_19-31-02/*')[5]
+q5_mu_7 = glob.glob('**/hw5_expl_q5_iql_medium_unsupervised_lam1_tau0.7_PointmassMedium-v0_22-11-2022_19-31-02/*')[5]
+q5_mu_9 = glob.glob('**/hw5_expl_q5_iql_medium_unsupervised_lam1_tau0.9_PointmassMedium-v0_22-11-2022_19-31-02/*')[5]
+q5_mu_99 = glob.glob('**/hw5_expl_q5_iql_medium_unsupervised_lam1_tau0.99_PointmassMedium-v0_22-11-2022_19-31-02/*')[5]
+
+steps,_,q5_mu_5 = get_section_results(q5_mu_5)
+steps,_,q5_mu_7 = get_section_results(q5_mu_7)
+steps,_,q5_mu_9 = get_section_results(q5_mu_9)
+steps,_,q5_mu_99 = get_section_results(q5_mu_99)
+
+
+fig1 = plt.figure()
+plt.plot(steps, q5_mu_5, label='0.5')
+plt.plot(steps, q5_mu_7, label='0.7')
+plt.plot(steps, q5_mu_9, label='0.9')
+plt.plot(steps, q5_mu_99, label='0.99')
+plt.xlabel('Iteration')
+plt.legend(loc='lower right', title='Tau')
+plt.ylabel('Average Return')
+plt.title('IQL (Unsupervised) Learning Curves for PointmassMedium, Varying Tau Values, Lambda=1')
+fig1.set_size_inches(10, 6)
+plt.show()
+
+fig1 = plt.figure()
+plt.plot(steps, q3_hard_cql, label='CQL')
+plt.plot(steps, q4_mu_1, label='AWAC')
+plt.plot(steps, q5_mu_9, label='IQL')
+plt.xlabel('Iteration')
+plt.legend(loc='lower right')
+plt.ylabel('Average Return')
+plt.title('Offline Learning Curves for PointmassMedium')
 fig1.set_size_inches(10, 6)
 plt.show()
